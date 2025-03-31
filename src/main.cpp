@@ -1,7 +1,7 @@
 #include "../include/glad/glad.h"
 #include "../lib/glfw/include/GLFW/glfw3.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "../include/stb_image.h"
+// #define STB_IMAGE_IMPLEMENTATION
+// #include "../include/stb_image.h"
 
 #include "../lib/glm/glm/glm.hpp"
 #include "../lib/glm/glm/gtc/matrix_transform.hpp"
@@ -10,12 +10,13 @@
 #include "../include/common.h"
 #include "../include/learnopengl/shader_m.h"
 
+#include <filesystem>
 #include <iostream>
 
 GlobalState* gs = nullptr;
 
 int main() {
-  // settings
+
   GlobalState gs_instance;
   gs = &gs_instance;
   // glfw: initialize and configure
@@ -56,7 +57,7 @@ int main() {
 
   // build and compile our shader zprogram
   // ------------------------------------
-  Shader ourShader("shaders/cubo.vs", "shaders/cubo.fs");
+  Shader ourShader(abspath("shaders/cubo.vs").c_str(), abspath("shaders/cubo.fs").c_str());
   glm::vec3 color(1.0f, 0.0f, 0.0f);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
