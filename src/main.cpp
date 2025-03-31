@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-GlobalState *gs = nullptr;
+GlobalState* gs = nullptr;
 
 int main() {
   // settings
@@ -31,7 +31,7 @@ int main() {
 
   // glfw window creation
   // --------------------
-  GLFWwindow *window = glfwCreateWindow(gs->SCR_WIDTH, gs->SCR_HEIGHT,
+  GLFWwindow* window = glfwCreateWindow(gs->SCR_WIDTH, gs->SCR_HEIGHT,
                                         "LearnOpenGL", NULL, NULL);
   if (window == NULL) {
     std::cout << "Failed to create GLFW window" << std::endl;
@@ -57,7 +57,7 @@ int main() {
   // build and compile our shader zprogram
   // ------------------------------------
   Shader ourShader("shaders/cubo.vs", "shaders/cubo.fs");
- glm::vec3 color(1.0f, 0.0f, 0.0f);
+  glm::vec3 color(1.0f, 0.0f, 0.0f);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
   float vertices[] = {
@@ -101,15 +101,13 @@ int main() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
   // position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
   // texture coord attribute
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
+                        (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
-  // load and create a shader
-  // -------------------------
   // render loop
   // -----------
   while (!glfwWindowShouldClose(window)) {
@@ -130,7 +128,7 @@ int main() {
 
     // activate shader
     ourShader.use();
-ourShader.setVec3("ourColor", color);
+    ourShader.setVec3("ourColor", color);
     // pass projection matrix to shader (note that in this case it could
     // change every frame)
     glm::mat4 projection = glm::perspective(
@@ -149,7 +147,7 @@ ourShader.setVec3("ourColor", color);
       // calculate the model matrix for each object and pass it to shader
       // before drawing
       glm::mat4 model = glm::mat4(
-          1.0f); // make sure to initialize matrix to identity matrix first
+          1.0f);  // make sure to initialize matrix to identity matrix first
       model = glm::translate(model, cubePositions[i]);
       // float angle = 20.0f * i;
       // model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f,

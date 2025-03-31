@@ -12,7 +12,7 @@
 // process all input: query GLFW whether relevant keys are pressed/released this
 // frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window, GlobalState *gs) {
+void processInput(GLFWwindow* window, GlobalState* gs) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 
@@ -28,21 +28,20 @@ void processInput(GLFWwindow *window, GlobalState *gs) {
     gs->cameraPos +=
         glm::normalize(glm::cross(gs->cameraFront, gs->cameraUp)) * cameraSpeed;
   bool spacebarPressed = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
-  
+
   // Toggle followMouse only when spacebar is pressed and wasn't pressed in the last frame
   if (spacebarPressed && !gs->spacebarPressedLastFrame) {
     gs->followMouse = !gs->followMouse;
   }
-  
+
   // Update the spacebar pressed state for the next frame
   gs->spacebarPressedLastFrame = spacebarPressed;
-
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback
 // function executes
 // ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
   // make sure the viewport matches the new window dimensions; note that width
   // and height will be significantly larger than specified on retina displays.
   glViewport(0, 0, width, height);
@@ -50,7 +49,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
-void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
   if (!gs->followMouse) {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     return;
@@ -67,7 +66,8 @@ void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
   }
 
   float xoffset = xpos - gs->lastX;
-  float yoffset = gs->lastY - ypos; // reversed since y-coordinates go from bottom to top
+  float yoffset =
+      gs->lastY - ypos;  // reversed since y-coordinates go from bottom to top
   gs->lastX = xpos;
   gs->lastY = ypos;
 
