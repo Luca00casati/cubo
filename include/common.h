@@ -20,7 +20,9 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 bool firstMouse = true;
+  float mouseSensitivity = 0.1f; // change this value to your liking
 bool followMouse = true;
+bool spacebarPressedLastFrame = false;
 float yaw = -90.0f; // yaw is initialized to -90.0 degrees since a yaw of 0.0
                     // results in a direction vector pointing to the right so we
                     // initially rotate a bit to the left.

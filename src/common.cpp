@@ -5,14 +5,14 @@
 #include "../lib/glm/glm/gtc/matrix_transform.hpp"
 #include "../lib/glm/glm/gtc/type_ptr.hpp"
 
-#include "../include/learnopengl/shader_m.h"
 #include "../include/common.h"
+#include "../include/learnopengl/shader_m.h"
 
 #include <iostream>
 // process all input: query GLFW whether relevant keys are pressed/released this
 // frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window, GlobalState * gs) {
+void processInput(GLFWwindow *window, GlobalState *gs) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 
@@ -27,8 +27,16 @@ void processInput(GLFWwindow *window, GlobalState * gs) {
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     gs->cameraPos +=
         glm::normalize(glm::cross(gs->cameraFront, gs->cameraUp)) * cameraSpeed;
-  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+  bool spacebarPressed = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
+  
+  // Toggle followMouse only when spacebar is pressed and wasn't pressed in the last frame
+  if (spacebarPressed && !gs->spacebarPressedLastFrame) {
     gs->followMouse = !gs->followMouse;
+  }
+  
+  // Update the spacebar pressed state for the next frame
+  gs->spacebarPressedLastFrame = spacebarPressed;
+
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback
@@ -43,7 +51,12 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
 void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
-if (gs->followMouse){
+  if (!gs->followMouse) {
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    return;
+  }
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
   float xpos = static_cast<float>(xposIn);
   float ypos = static_cast<float>(yposIn);
 
@@ -54,14 +67,12 @@ if (gs->followMouse){
   }
 
   float xoffset = xpos - gs->lastX;
-  float yoffset =
-      gs->lastY - ypos; // reversed since y-coordinates go from bottom to top
+  float yoffset = gs->lastY - ypos; // reversed since y-coordinates go from bottom to top
   gs->lastX = xpos;
   gs->lastY = ypos;
 
-  float sensitivity = 0.1f; // change this value to your liking
-  xoffset *= sensitivity;
-  yoffset *= sensitivity;
+  xoffset *= gs->mouseSensitivity;
+  yoffset *= gs->mouseSensitivity;
 
   gs->yaw += xoffset;
   gs->pitch += yoffset;
@@ -77,7 +88,6 @@ if (gs->followMouse){
   front.y = sin(glm::radians(gs->pitch));
   front.z = sin(glm::radians(gs->yaw)) * cos(glm::radians(gs->pitch));
   gs->cameraFront = glm::normalize(front);
-}
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called

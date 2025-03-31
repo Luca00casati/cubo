@@ -7,15 +7,17 @@
 #include "../lib/glm/glm/gtc/matrix_transform.hpp"
 #include "../lib/glm/glm/gtc/type_ptr.hpp"
 
-#include "../include/learnopengl/shader_m.h"
 #include "../include/common.h"
+#include "../include/learnopengl/shader_m.h"
 
 #include <iostream>
-GlobalState* gs = nullptr;
+
+GlobalState *gs = nullptr;
+
 int main() {
-// settings
-GlobalState gs_instance;
-    gs = &gs_instance;
+  // settings
+  GlobalState gs_instance;
+  gs = &gs_instance;
   // glfw: initialize and configure
   // ------------------------------
   glfwInit();
@@ -29,8 +31,8 @@ GlobalState gs_instance;
 
   // glfw window creation
   // --------------------
-  GLFWwindow *window =
-      glfwCreateWindow(gs->SCR_WIDTH, gs->SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+  GLFWwindow *window = glfwCreateWindow(gs->SCR_WIDTH, gs->SCR_HEIGHT,
+                                        "LearnOpenGL", NULL, NULL);
   if (window == NULL) {
     std::cout << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
@@ -40,9 +42,6 @@ GlobalState gs_instance;
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwSetCursorPosCallback(window, mouse_callback);
   // glfwSetScrollCallback(window, scroll_callback);
-
-  // tell GLFW to capture our mouse
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   // glad: load all OpenGL function pointers
   // ---------------------------------------
@@ -57,8 +56,8 @@ GlobalState gs_instance;
 
   // build and compile our shader zprogram
   // ------------------------------------
-  Shader ourShader("shaders/7.3.camera.vs", "shaders/7.3.camera.fs");
-
+  Shader ourShader("shaders/cubo.vs", "shaders/cubo.fs");
+ glm::vec3 color(1.0f, 0.0f, 0.0f);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
   float vertices[] = {
@@ -109,40 +108,8 @@ GlobalState gs_instance;
                         (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
-  // load and create a texture
+  // load and create a shader
   // -------------------------
-  unsigned int texture1;
-  // texture 1
-  // ---------
-  glGenTextures(1, &texture1);
-  glBindTexture(GL_TEXTURE_2D, texture1);
-  // set the texture wrapping parameters
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  // set texture filtering parameters
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  // load image, create texture and generate mipmaps
-  int width, height, nrChannels;
-  stbi_set_flip_vertically_on_load(
-      true); // tell stb_image.h to flip loaded texture's on the y-axis.
-  unsigned char *data = stbi_load("resources/textures/container.jpg", &width,
-                                  &height, &nrChannels, 0);
-  if (data) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    std::cout << "Failed to load texture" << std::endl;
-  }
-  stbi_image_free(data);
-
-  // tell opengl for each sampler to which texture unit it belongs to (only has
-  // to be done once)
-  // -------------------------------------------------------------------------------------------
-  ourShader.use();
-  ourShader.setInt("texture1", 0);
-
   // render loop
   // -----------
   while (!glfwWindowShouldClose(window)) {
@@ -161,40 +128,39 @@ GlobalState gs_instance;
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // bind textures on corresponding texture units
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-
     // activate shader
     ourShader.use();
-
-    // pass projection matrix to shader (note that in this case it could change
-    // every frame)
+ourShader.setVec3("ourColor", color);
+    // pass projection matrix to shader (note that in this case it could
+    // change every frame)
     glm::mat4 projection = glm::perspective(
-        glm::radians(gs->fov), (float)gs->SCR_WIDTH / (float)gs->SCR_HEIGHT, 0.1f, 100.0f);
+        glm::radians(gs->fov), (float)gs->SCR_WIDTH / (float)gs->SCR_HEIGHT,
+        0.1f, 100.0f);
     ourShader.setMat4("projection", projection);
 
     // camera/view transformation
-    glm::mat4 view = glm::lookAt(gs->cameraPos, gs->cameraPos + gs->cameraFront, gs->cameraUp);
+    glm::mat4 view = glm::lookAt(gs->cameraPos, gs->cameraPos + gs->cameraFront,
+                                 gs->cameraUp);
     ourShader.setMat4("view", view);
 
     // render boxes
     glBindVertexArray(VAO);
     for (unsigned int i = 0; i < 10; i++) {
-      // calculate the model matrix for each object and pass it to shader before
-      // drawing
+      // calculate the model matrix for each object and pass it to shader
+      // before drawing
       glm::mat4 model = glm::mat4(
           1.0f); // make sure to initialize matrix to identity matrix first
       model = glm::translate(model, cubePositions[i]);
       // float angle = 20.0f * i;
-      // model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+      // model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f,
+      // 0.5f));
       ourShader.setMat4("model", model);
 
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
-    // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
-    // etc.)
+    // glfw: swap buffers and poll IO events (keys pressed/released, mouse
+    // moved etc.)
     // -------------------------------------------------------------------------------
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -210,4 +176,3 @@ GlobalState gs_instance;
   glfwTerminate();
   return 0;
 }
-
