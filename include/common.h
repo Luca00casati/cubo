@@ -9,7 +9,6 @@
 
 #include "../include/learnopengl/shader_m.h"
 
-#include <iostream>
 typedef struct GlobalState {
   const unsigned int SCR_WIDTH = 800;
   const unsigned int SCR_HEIGHT = 600;
@@ -39,5 +38,5 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 void processInput(GLFWwindow* window, GlobalState* gs);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 // void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
-std::string abspath(const char* path);
+// std::string abspath(const char* path);
 #endif

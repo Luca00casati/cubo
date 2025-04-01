@@ -9,8 +9,8 @@
 #include "../include/learnopengl/shader_m.h"
 
 #include <iostream>
-#include <filesystem>
-#include <cassert>
+//  #include <filesystem>
+// #include <cassert>
 // process all input: query GLFW whether relevant keys are pressed/released this
 // frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
@@ -104,8 +104,10 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
 }
 */
 
-std::string abspath(const char* path){
+/* 
+  constexpr std::string abspath(const char* path){
   std::filesystem::path p = path;
  assert(std::filesystem::exists(p) && "Error: Path does not exist.");
   return std::filesystem::absolute(p).string();
 }
+*/

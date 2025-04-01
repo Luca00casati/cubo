@@ -57,7 +57,15 @@ int main() {
 
   // build and compile our shader zprogram
   // ------------------------------------
-  Shader ourShader(abspath("shaders/cubo.vs").c_str(), abspath("shaders/cubo.fs").c_str());
+  const char* home = nullptr;
+  // windows home = std::getenv("USERPROFILE");
+  home = std::getenv("HOME");
+  std::filesystem::path vsabspath =
+      std::filesystem::path(home) / "cubo" / "shaders" / "cubo.vs";
+  std::filesystem::path fsabspath =
+      std::filesystem::path(home) / "cubo" / "shaders" / "cubo.fs";
+
+  Shader ourShader(vsabspath.c_str(), fsabspath.c_str());
   glm::vec3 color(1.0f, 0.0f, 0.0f);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
