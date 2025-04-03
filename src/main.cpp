@@ -8,9 +8,7 @@
 #include "../lib/glm/glm/gtc/type_ptr.hpp"
 
 #include "../include/common.h"
-#include "../include/learnopengl/shader_m.h"
 
-#include <filesystem>
 #include <iostream>
 
 GlobalState* gs = nullptr;
@@ -55,20 +53,49 @@ int main() {
   // -----------------------------
   glEnable(GL_DEPTH_TEST);
 
+  const char* cubevertexsrc = R"(
+#version 330 core
+
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTexCoord;
+
+out vec2 TexCoord;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+void main()
+{
+    TexCoord = aTexCoord;
+    gl_Position = projection * view * model * vec4(aPos, 1.0f);
+})";
+
+  const char* cubefragmentsrc = R"(
+#version 330 core
+
+out vec4 FragColor;
+in vec2 TexCoord;
+
+uniform vec3 ourColor;
+
+void main()
+{
+    FragColor = vec4(ourColor, 1.0f);
+})";
+
   // build and compile our shader zprogram
   // ------------------------------------
-  const char* home = nullptr;
-  // windows home = std::getenv("USERPROFILE");
-  home = std::getenv("HOME");
-  std::filesystem::path vsabspath =
-      std::filesystem::path(home) / "cubo" / "shaders" / "cubo.vs";
-  std::filesystem::path fsabspath =
-      std::filesystem::path(home) / "cubo" / "shaders" / "cubo.fs";
+  unsigned int cubeprogramm =
+      createandstuffshaderprogram(cubevertexsrc, cubefragmentsrc);
 
-  Shader ourShader(vsabspath.c_str(), fsabspath.c_str());
-  glm::vec3 color(1.0f, 0.0f, 0.0f);
+  glm::vec3 red(1.0f, 0.0f, 0.0f);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
+  float crosshairVertices[] = {// Horizontal line
+                               -0.05f, 0.0f, 0.0f, 0.05f, 0.0f, 0.0f,
+                               // Vertical line
+                               0.0f, 0.05f, 0.0f, 0.0f, -0.05f, 0.0f};
   float vertices[] = {
       -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f,
       0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
@@ -99,7 +126,9 @@ int main() {
       glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
       glm::vec3(2.4f, -0.4f, -3.5f),  glm::vec3(-1.7f, 3.0f, -7.5f),
       glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
+      glm::vec3(3.3f, -1.0f, -2.5f),  glm::vec3(3.5f, 1.0f, -2.5f),
       glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
+  gs->ncube = 12;
   unsigned int VBO, VAO;
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
@@ -136,23 +165,23 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // activate shader
-    ourShader.use();
-    ourShader.setVec3("ourColor", color);
+    glUseProgram(cubeprogramm);
+    setVec3(cubeprogramm,"ourColor", red);
     // pass projection matrix to shader (note that in this case it could
     // change every frame)
     glm::mat4 projection = glm::perspective(
         glm::radians(gs->fov), (float)gs->SCR_WIDTH / (float)gs->SCR_HEIGHT,
         0.1f, 100.0f);
-    ourShader.setMat4("projection", projection);
+    setMat4(cubeprogramm,"projection", projection);
 
     // camera/view transformation
     glm::mat4 view = glm::lookAt(gs->cameraPos, gs->cameraPos + gs->cameraFront,
                                  gs->cameraUp);
-    ourShader.setMat4("view", view);
+    setMat4(cubeprogramm,"view", view);
 
     // render boxes
     glBindVertexArray(VAO);
-    for (unsigned int i = 0; i < 10; i++) {
+    for (unsigned int i = 0; i < gs->ncube; i++) {
       // calculate the model matrix for each object and pass it to shader
       // before drawing
       glm::mat4 model = glm::mat4(
@@ -161,7 +190,7 @@ int main() {
       // float angle = 20.0f * i;
       // model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f,
       // 0.5f));
-      ourShader.setMat4("model", model);
+      setMat4(cubeprogramm,"model", model);
 
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }

@@ -7,8 +7,7 @@
 #include "../lib/glm/glm/gtc/matrix_transform.hpp"
 #include "../lib/glm/glm/gtc/type_ptr.hpp"
 
-#include "../include/learnopengl/shader_m.h"
-
+#include <iostream>
 typedef struct GlobalState {
   const unsigned int SCR_WIDTH = 800;
   const unsigned int SCR_HEIGHT = 600;
@@ -32,6 +31,7 @@ typedef struct GlobalState {
   // timing
   float deltaTime = 0.0f;  // time between current frame and last frame
   float lastFrame = 0.0f;
+  size_t ncube = 0;
 } GS;
 extern GlobalState* gs;
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
@@ -39,4 +39,31 @@ void processInput(GLFWwindow* window, GlobalState* gs);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 // void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 // std::string abspath(const char* path);
+unsigned int createandstuffshaderprogram(const char* vertexShaderCode,
+                                         const char* fragmentShaderCode);
+
+void setBool(unsigned int& shaderprogramm, const std::string& name,
+             bool value) ;
+void setInt(unsigned int& shaderprogramm, const std::string& name,
+            int value) ;
+void setFloat(unsigned int& shaderprogramm, const std::string& name,
+              float value) ;
+void setVec2(unsigned int& shaderprogramm, const std::string& name,
+             const glm::vec2& value) ;
+void setVec2(unsigned int& shaderprogramm, const std::string& name, float x,
+             float y) ;
+void setVec3(unsigned int& shaderprogramm, const std::string& name,
+             const glm::vec3& value) ;
+void setVec3(unsigned int& shaderprogramm, const std::string& name, float x,
+             float y, float z) ;
+void setVec4(unsigned int& shaderprogramm, const std::string& name,
+             const glm::vec4& value) ;
+void setVec4(unsigned int& shaderprogramm, const std::string& name, float x,
+             float y, float z, float w) ;
+void setMat2(unsigned int& shaderprogramm, const std::string& name,
+             const glm::mat2& mat) ;
+void setMat3(unsigned int& shaderprogramm, const std::string& name,
+             const glm::mat3& mat) ;
+void setMat4(unsigned int& shaderprogramm, const std::string& name,
+             const glm::mat4& mat) ;
 #endif
