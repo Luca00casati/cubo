@@ -86,7 +86,7 @@ void main()
 
   // build and compile our shader zprogram
   // ------------------------------------
-  unsigned int cubeprogramm =
+  uint cubeprogramm =
       createandstuffshaderprogram(cubevertexsrc, cubefragmentsrc);
 
   glm::vec3 red(1.0f, 0.0f, 0.0f);
@@ -129,7 +129,7 @@ void main()
       glm::vec3(3.3f, -1.0f, -2.5f),  glm::vec3(3.5f, 1.0f, -2.5f),
       glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
   gs->ncube = 12;
-  unsigned int VBO, VAO;
+  uint VBO, VAO;
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
 
@@ -181,7 +181,7 @@ void main()
 
     // render boxes
     glBindVertexArray(VAO);
-    for (unsigned int i = 0; i < gs->ncube; i++) {
+    for (uint i = 0; i < gs->ncube; i++) {
       // calculate the model matrix for each object and pass it to shader
       // before drawing
       glm::mat4 model = glm::mat4(

@@ -9,8 +9,8 @@
 
 #include <iostream>
 typedef struct GlobalState {
-  const unsigned int SCR_WIDTH = 800;
-  const unsigned int SCR_HEIGHT = 600;
+  const uint SCR_WIDTH = 800;
+  const uint SCR_HEIGHT = 600;
 
   // camera
   glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -39,31 +39,31 @@ void processInput(GLFWwindow* window, GlobalState* gs);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 // void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 // std::string abspath(const char* path);
-unsigned int createandstuffshaderprogram(const char* vertexShaderCode,
+uint createandstuffshaderprogram(const char* vertexShaderCode,
                                          const char* fragmentShaderCode);
 
-void setBool(unsigned int& shaderprogramm, const std::string& name,
+void setBool(uint& shaderprogramm, const std::string& name,
              bool value) ;
-void setInt(unsigned int& shaderprogramm, const std::string& name,
+void setInt(uint& shaderprogramm, const std::string& name,
             int value) ;
-void setFloat(unsigned int& shaderprogramm, const std::string& name,
+void setFloat(uint& shaderprogramm, const std::string& name,
               float value) ;
-void setVec2(unsigned int& shaderprogramm, const std::string& name,
+void setVec2(uint& shaderprogramm, const std::string& name,
              const glm::vec2& value) ;
-void setVec2(unsigned int& shaderprogramm, const std::string& name, float x,
+void setVec2(uint& shaderprogramm, const std::string& name, float x,
              float y) ;
-void setVec3(unsigned int& shaderprogramm, const std::string& name,
+void setVec3(uint& shaderprogramm, const std::string& name,
              const glm::vec3& value) ;
-void setVec3(unsigned int& shaderprogramm, const std::string& name, float x,
+void setVec3(uint& shaderprogramm, const std::string& name, float x,
              float y, float z) ;
-void setVec4(unsigned int& shaderprogramm, const std::string& name,
+void setVec4(uint& shaderprogramm, const std::string& name,
              const glm::vec4& value) ;
-void setVec4(unsigned int& shaderprogramm, const std::string& name, float x,
+void setVec4(uint& shaderprogramm, const std::string& name, float x,
              float y, float z, float w) ;
-void setMat2(unsigned int& shaderprogramm, const std::string& name,
+void setMat2(uint& shaderprogramm, const std::string& name,
              const glm::mat2& mat) ;
-void setMat3(unsigned int& shaderprogramm, const std::string& name,
+void setMat3(uint& shaderprogramm, const std::string& name,
              const glm::mat3& mat) ;
-void setMat4(unsigned int& shaderprogramm, const std::string& name,
+void setMat4(uint& shaderprogramm, const std::string& name,
              const glm::mat4& mat) ;
 #endif
