@@ -11,12 +11,32 @@
 
 #include <iostream>
 
-GlobalState* gs = nullptr;
+// global
+const uint SCR_WIDTH = 800;
+const uint SCR_HEIGHT = 600;
+
+// camera
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+bool firstMouse = true;
+float mouseSensitivity = 0.1f;  // change this value to your liking
+bool followMouse = true;
+bool wireframe = false;
+float yaw = -90.0f;  // yaw is initialized to -90.0 degrees since a yaw of 0.0
+    // results in a direction vector pointing to the right so we
+    // initially rotate a bit to the left.
+float pitch = 0.0f;
+float lastX = 800.0f / 2.0;
+float lastY = 600.0 / 2.0;
+float fov = 45.0f;
+// timing
+float deltaTime = 0.0f;  // time between current frame and last frame
+float lastFrame = 0.0f;
+uint ncube = 0;
 
 int main() {
-
-  GlobalState gs_instance;
-  gs = &gs_instance;
   // glfw: initialize and configure
   // ------------------------------
   glfwInit();
@@ -30,8 +50,8 @@ int main() {
 
   // glfw window creation
   // --------------------
-  GLFWwindow* window = glfwCreateWindow(gs->SCR_WIDTH, gs->SCR_HEIGHT,
-                                        "LearnOpenGL", NULL, NULL);
+  GLFWwindow* window =
+      glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
   if (window == NULL) {
     std::cout << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
@@ -39,6 +59,8 @@ int main() {
   }
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+  glfwSetKeyCallback(window, keyCallback);
+  glfwSetInputMode(window, GLFW_STICKY_KEYS, TRUE);
   glfwSetCursorPosCallback(window, mouse_callback);
   // glfwSetScrollCallback(window, scroll_callback);
 
@@ -128,7 +150,7 @@ void main()
       glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
       glm::vec3(3.3f, -1.0f, -2.5f),  glm::vec3(3.5f, 1.0f, -2.5f),
       glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
-  gs->ncube = 12;
+  ncube = 12;
   uint VBO, VAO;
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
@@ -152,12 +174,11 @@ void main()
     // per-frame time logic
     // --------------------
     float currentFrame = static_cast<float>(glfwGetTime());
-    gs->deltaTime = currentFrame - gs->lastFrame;
-    gs->lastFrame = currentFrame;
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
 
     // input
     // -----
-    processInput(window, gs);
 
     // render
     // ------
@@ -166,22 +187,20 @@ void main()
 
     // activate shader
     glUseProgram(cubeprogramm);
-    setVec3(cubeprogramm,"ourColor", red);
+    setVec3(cubeprogramm, "ourColor", red);
     // pass projection matrix to shader (note that in this case it could
     // change every frame)
     glm::mat4 projection = glm::perspective(
-        glm::radians(gs->fov), (float)gs->SCR_WIDTH / (float)gs->SCR_HEIGHT,
-        0.1f, 100.0f);
-    setMat4(cubeprogramm,"projection", projection);
+        glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    setMat4(cubeprogramm, "projection", projection);
 
     // camera/view transformation
-    glm::mat4 view = glm::lookAt(gs->cameraPos, gs->cameraPos + gs->cameraFront,
-                                 gs->cameraUp);
-    setMat4(cubeprogramm,"view", view);
+    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    setMat4(cubeprogramm, "view", view);
 
     // render boxes
     glBindVertexArray(VAO);
-    for (uint i = 0; i < gs->ncube; i++) {
+    for (uint i = 0; i < ncube; i++) {
       // calculate the model matrix for each object and pass it to shader
       // before drawing
       glm::mat4 model = glm::mat4(
@@ -190,7 +209,7 @@ void main()
       // float angle = 20.0f * i;
       // model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f,
       // 0.5f));
-      setMat4(cubeprogramm,"model", model);
+      setMat4(cubeprogramm, "model", model);
 
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
@@ -211,4 +230,81 @@ void main()
   // ------------------------------------------------------------------
   glfwTerminate();
   return 0;
+}
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action,
+                 int mods) {
+  if (key == GLFW_KEY_ESCAPE AND action == GLFW_PRESS)
+    glfwSetWindowShouldClose(window, true);
+
+  float cameraSpeed = static_cast<float>(2.5 * deltaTime);
+  if (key == GLFW_KEY_W AND action == GLFW_PRESS)
+    cameraPos += cameraSpeed * cameraFront;
+  if (key == GLFW_KEY_S AND action == GLFW_PRESS)
+    cameraPos -= cameraSpeed * cameraFront;
+  if (key == GLFW_KEY_A AND action == GLFW_PRESS)
+    cameraPos -=
+        glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+  if (key == GLFW_KEY_D AND action == GLFW_PRESS)
+    cameraPos +=
+        glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+  if (key == GLFW_KEY_SPACE AND action == GLFW_RELEASE)
+    followMouse = !followMouse;
+  if (key == GLFW_KEY_K AND action == GLFW_RELEASE) {
+    wireframe = !wireframe;  // Toggle wireframe mode
+    if (wireframe) {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Set wireframe mode
+    } else {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // Set solid mode
+    }
+  }
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+  // make sure the viewport matches the new window dimensions; note that width
+  // and height will be significantly larger than specified on retina displays.
+  glViewport(0, 0, width, height);
+}
+
+// glfw: whenever the mouse moves, this callback is called
+// -------------------------------------------------------
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
+  if (!followMouse) {
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    return;
+  }
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+  float xpos = static_cast<float>(xposIn);
+  float ypos = static_cast<float>(yposIn);
+
+  if (firstMouse) {
+    lastX = xpos;
+    lastY = ypos;
+    firstMouse = false;
+  }
+
+  float xoffset = xpos - lastX;
+  float yoffset =
+      lastY - ypos;  // reversed since y-coordinates go from bottom to top
+  lastX = xpos;
+  lastY = ypos;
+
+  xoffset *= mouseSensitivity;
+  yoffset *= mouseSensitivity;
+
+  yaw += xoffset;
+  pitch += yoffset;
+
+  // make sure that when pitch is out of bounds, screen doesn't get flipped
+  if (pitch > 89.0f)
+    pitch = 89.0f;
+  if (pitch < -89.0f)
+    pitch = -89.0f;
+
+  glm::vec3 front;
+  front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+  front.y = sin(glm::radians(pitch));
+  front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+  cameraFront = glm::normalize(front);
 }
