@@ -10,7 +10,7 @@
 #include <iostream>
 
 uint createandstuffshaderprogram(const char* vertexShaderCode,
-                                         const char* fragmentShaderCode) {
+                                 const char* fragmentShaderCode) {
   uint vertex, fragment, shaderprogramm;
   vertex = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex, 1, &vertexShaderCode, NULL);
@@ -27,18 +27,15 @@ uint createandstuffshaderprogram(const char* vertexShaderCode,
   return shaderprogramm;
 }
 
-void setBool(uint& shaderprogramm, const std::string& name,
-             bool value) {
+void setBool(uint& shaderprogramm, const std::string& name, bool value) {
   glUniform1i(glGetUniformLocation(shaderprogramm, name.c_str()), (int)value);
 }
 // ------------------------------------------------------------------------
-void setInt(uint& shaderprogramm, const std::string& name,
-            int value) {
+void setInt(uint& shaderprogramm, const std::string& name, int value) {
   glUniform1i(glGetUniformLocation(shaderprogramm, name.c_str()), value);
 }
 // ------------------------------------------------------------------------
-void setFloat(uint& shaderprogramm, const std::string& name,
-              float value) {
+void setFloat(uint& shaderprogramm, const std::string& name, float value) {
   glUniform1f(glGetUniformLocation(shaderprogramm, name.c_str()), value);
 }
 // ------------------------------------------------------------------------
@@ -47,8 +44,7 @@ void setVec2(uint& shaderprogramm, const std::string& name,
   glUniform2fv(glGetUniformLocation(shaderprogramm, name.c_str()), 1,
                &value[0]);
 }
-void setVec2(uint& shaderprogramm, const std::string& name, float x,
-             float y) {
+void setVec2(uint& shaderprogramm, const std::string& name, float x, float y) {
   glUniform2f(glGetUniformLocation(shaderprogramm, name.c_str()), x, y);
 }
 // ------------------------------------------------------------------------
@@ -57,8 +53,8 @@ void setVec3(uint& shaderprogramm, const std::string& name,
   glUniform3fv(glGetUniformLocation(shaderprogramm, name.c_str()), 1,
                &value[0]);
 }
-void setVec3(uint& shaderprogramm, const std::string& name, float x,
-             float y, float z) {
+void setVec3(uint& shaderprogramm, const std::string& name, float x, float y,
+             float z) {
   glUniform3f(glGetUniformLocation(shaderprogramm, name.c_str()), x, y, z);
 }
 // ------------------------------------------------------------------------
@@ -67,8 +63,8 @@ void setVec4(uint& shaderprogramm, const std::string& name,
   glUniform4fv(glGetUniformLocation(shaderprogramm, name.c_str()), 1,
                &value[0]);
 }
-void setVec4(uint& shaderprogramm, const std::string& name, float x,
-             float y, float z, float w) {
+void setVec4(uint& shaderprogramm, const std::string& name, float x, float y,
+             float z, float w) {
   glUniform4f(glGetUniformLocation(shaderprogramm, name.c_str()), x, y, z, w);
 }
 // ------------------------------------------------------------------------

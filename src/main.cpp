@@ -35,6 +35,8 @@ float fov = 45.0f;
 // timing
 float deltaTime = 0.0f;  // time between current frame and last frame
 float lastFrame = 0.0f;
+int lastframekey = 0;
+int lastframemod = 0;
 uint ncube = 0;
 
 int main() {
@@ -61,7 +63,8 @@ int main() {
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwSetKeyCallback(window, keyCallback);
-  glfwSetInputMode(window, GLFW_STICKY_KEYS, FALSE);
+  glfwSetInputMode(window, GLFW_STICKY_KEYS, true);
+  //glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
   glfwSetCursorPosCallback(window, mouse_callback);
   // glfwSetScrollCallback(window, scroll_callback);
 
@@ -231,65 +234,33 @@ void main()
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action,
-                 int mods) {
-  if (key == GLFW_KEY_ESCAPE AND action == GLFW_PRESS)
+                 int mod) {
+
+  lastframekey = key;
+  lastframemod = key;
+  if (key == GLFW_KEY_ESCAPE and action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 
-  float camspeed = static_cast<float>(cameraSpeed * deltaTime);
-  /*
-  if (key == GLFW_KEY_W) {
-    switch (action) {
-      case GLFW_PRESS:
-      case GLFW_REPEAT:
-        cameraPos += camspeed * cameraFront;
-        break;
-    }
+  float camspeed = cameraSpeed * deltaTime;
+  if (MY_KEY_REPEAT(GLFW_KEY_W)) {
+    cameraPos += glm::vec3(0.0f, 0.0f, -1.0f) * camspeed;
   }
-*/
-  if (key == GLFW_KEY_W) {
-    switch (action) {
-      case GLFW_PRESS:
-      case GLFW_REPEAT:
-        cameraPos += glm::vec3(0.0f, 0.0f, -1.0f) * camspeed;
-        break;
-    }
+  if (MY_KEY_REPEAT(GLFW_KEY_S)) {
+    cameraPos += glm::vec3(0.0f, 0.0f, 1.0f) * camspeed;
   }
-  if (key == GLFW_KEY_S) {
-    switch (action) {
-      case GLFW_PRESS:
-      case GLFW_REPEAT:
-        cameraPos += glm::vec3(0.0f, 0.0f, 1.0f) * camspeed;
-        break;
-    }
+  if (MY_KEY_REPEAT(GLFW_KEY_A)) {
+    cameraPos += glm::vec3(-1.0f, 0.0f, 0.0f) * camspeed;
   }
-  /*
-  if (key == GLFW_KEY_A) {
-    switch (action) {
-      case GLFW_PRESS:
-      case GLFW_REPEAT:
-        cameraPos -=
-            glm::normalize(glm::cross(cameraFront, cameraUp)) * camspeed;
-        break;
-    }
+  if (MY_KEY_REPEAT(GLFW_KEY_D)) {
+    cameraPos += glm::vec3(1.0f, 0.0f, 0.0f) * camspeed;
   }
-*/
-  if (key == GLFW_KEY_A) {
-    switch (action) {
-      case GLFW_PRESS:
-      case GLFW_REPEAT:
-        cameraPos += glm::vec3(-1.0f, 0.0f, 0.0f) * camspeed;
-        break;
-    }
+  if (MY_KEY_REPEAT(GLFW_KEY_SPACE)) {
+    cameraPos += glm::vec3(0.0f, 1.0f, 0.0f) * camspeed;
   }
-  if (key == GLFW_KEY_D) {
-    switch (action) {
-      case GLFW_PRESS:
-      case GLFW_REPEAT:
-        cameraPos += glm::vec3(1.0f, 0.0f, 0.0f) * camspeed;
-        break;
-    }
+  if (MY_KEY_REPEAT(GLFW_KEY_LEFT_SHIFT)) {
+    cameraPos += glm::vec3(0.0f, -1.0f, 0.0f) * camspeed;
   }
-  if (key == GLFW_KEY_Q AND action == GLFW_RELEASE)
+  if (key == GLFW_KEY_Q and action == GLFW_RELEASE)
     followMouse = !followMouse;
   if (followMouse) {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -297,7 +268,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action,
     glfwSetCursorPos(window, lastX, lastY);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   }
-  if (key == GLFW_KEY_K AND action == GLFW_RELEASE) {
+  if (key == GLFW_KEY_K and action == GLFW_RELEASE) {
     wireframe = !wireframe;  // Toggle wireframe mode
     if (wireframe) {
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Set wireframe mode
