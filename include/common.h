@@ -9,16 +9,26 @@
 
 #include <iostream>
 
+namespace mycolor {
+inline glm::vec3 red(1.0f, 0.0f, 0.0f);
+inline glm::vec3 green(0.0f, 1.0f, 0.0f);
+inline glm::vec3 blue(0.0f, 0.0f, 1.0f);
+inline glm::vec3 white(1.0f, 1.0f, 1.0f);
+inline glm::vec3 black(0.0f, 0.0f, 0.0f);
+}  // namespace mycolor
+
+#define SCR_WIDTH 800
+#define SCR_HEIGHT 600
+
 #define AND &&
 #define OR ||
 #define TRUE 1
 #define FALSE 0
 #define MY_KEY_REPEAT(KEY) \
-  key == KEY and lastframekey == KEY and action != GLFW_RELEASE
-#define MY_MOD_REPEAT(MOD) \
-  mod == MOD and lastframemod == MOD and action != GLFW_RELEASE
-void keyCallback(GLFWwindow* window, int key, int scancode, int action,
-                 int mod);
+  (key == (KEY) || lastframekey == (KEY)) && action != GLFW_RELEASE
+void input(GLFWwindow* window);
+//void keyCallback(GLFWwindow* window, int key, int scancode, int action,
+//                 int mod);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 // void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);

@@ -12,17 +12,14 @@
 #include <iostream>
 
 // global
-const uint SCR_WIDTH = 800;
-const uint SCR_HEIGHT = 600;
-
 // camera
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 10.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float cameraSpeed = 4.0f;
 
 bool firstMouse = true;
-float mouseSensitivity = 0.1f;  // change this value to your liking
+float mouseSensitivity = 0.1f;
 bool followMouse = true;
 bool wireframe = false;
 float yaw = -90.0f;  // yaw is initialized to -90.0 degrees since a yaw of 0.0
@@ -35,9 +32,13 @@ float fov = 45.0f;
 // timing
 float deltaTime = 0.0f;  // time between current frame and last frame
 float lastFrame = 0.0f;
-int lastframekey = 0;
-int lastframemod = 0;
-uint ncube = 0;
+
+glm::vec3 bgcolor = mycolor::white;
+
+//locked keys
+bool keylock_q = false;
+bool keylock_k = false;
+
 
 int main() {
   // glfw: initialize and configure
@@ -62,8 +63,8 @@ int main() {
   }
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-  glfwSetKeyCallback(window, keyCallback);
-  glfwSetInputMode(window, GLFW_STICKY_KEYS, true);
+  //glfwSetKeyCallback(window, keyCallback);
+  //glfwSetInputMode(window, GLFW_STICKY_KEYS, true);
   //glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
   glfwSetCursorPosCallback(window, mouse_callback);
   // glfwSetScrollCallback(window, scroll_callback);
@@ -115,7 +116,6 @@ void main()
   uint cubeprogramm =
       createandstuffshaderprogram(cubevertexsrc, cubefragmentsrc);
 
-  glm::vec3 red(1.0f, 0.0f, 0.0f);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
   float crosshairVertices[] = {// Horizontal line
@@ -147,14 +147,12 @@ void main()
       0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
       -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
   // world space positions of our cubes
-  glm::vec3 cubePositions[] = {
-      glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
-      glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
-      glm::vec3(2.4f, -0.4f, -3.5f),  glm::vec3(-1.7f, 3.0f, -7.5f),
-      glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
-      glm::vec3(3.3f, -1.0f, -2.5f),  glm::vec3(3.5f, 1.0f, -2.5f),
-      glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
-  ncube = 12;
+  std::vector<glm::vec3> veccubePositions = {
+      glm::vec3(0.0f, 0.0f, 0.0f),   glm::vec3(2.0f, 5.0f, 0.0f),
+      glm::vec3(-1.5f, -2.2f, 0.0f), glm::vec3(-3.8f, -2.0f, 0.0f),
+      glm::vec3(2.4f, -0.4f, 0.0f),  glm::vec3(-1.7f, 3.0f, 0.0f),
+      glm::vec3(1.3f, -2.0f, 0.0f),  glm::vec3(1.5f, 2.0f, 0.0f),
+      glm::vec3(3.3f, -1.0f, 0.0f),  glm::vec3(3.5f, 1.0f, 0.0f)};
   uint VBO, VAO;
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
@@ -183,12 +181,13 @@ void main()
 
     // render
     // ------
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    input(window);
+    glClearColor(bgcolor.x, bgcolor.y, bgcolor.z, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // activate shader
     glUseProgram(cubeprogramm);
-    setVec3(cubeprogramm, "ourColor", red);
+    setVec3(cubeprogramm, "ourColor", mycolor::red);
     // pass projection matrix to shader (note that in this case it could
     // change every frame)
     glm::mat4 projection = glm::perspective(
@@ -201,15 +200,12 @@ void main()
 
     // render boxes
     glBindVertexArray(VAO);
-    for (uint i = 0; i < ncube; i++) {
+    for (uint i = 0; i < veccubePositions.size(); i++) {
       // calculate the model matrix for each object and pass it to shader
       // before drawing
       glm::mat4 model = glm::mat4(
           1.0f);  // make sure to initialize matrix to identity matrix first
-      model = glm::translate(model, cubePositions[i]);
-      // float angle = 20.0f * i;
-      // model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f,
-      // 0.5f));
+      model = glm::translate(model, veccubePositions[i]);
       setMat4(cubeprogramm, "model", model);
 
       glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -233,48 +229,56 @@ void main()
   return 0;
 }
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action,
-                 int mod) {
-
-  lastframekey = key;
-  lastframemod = key;
-  if (key == GLFW_KEY_ESCAPE and action == GLFW_PRESS)
+void input(GLFWwindow* window) {
+  int keystate = 0;
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 
   float camspeed = cameraSpeed * deltaTime;
-  if (MY_KEY_REPEAT(GLFW_KEY_W)) {
-    cameraPos += glm::vec3(0.0f, 0.0f, -1.0f) * camspeed;
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    cameraPos += cameraFront * camspeed;
   }
-  if (MY_KEY_REPEAT(GLFW_KEY_S)) {
-    cameraPos += glm::vec3(0.0f, 0.0f, 1.0f) * camspeed;
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    cameraPos -= cameraFront * camspeed;
   }
-  if (MY_KEY_REPEAT(GLFW_KEY_A)) {
-    cameraPos += glm::vec3(-1.0f, 0.0f, 0.0f) * camspeed;
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * camspeed;
   }
-  if (MY_KEY_REPEAT(GLFW_KEY_D)) {
-    cameraPos += glm::vec3(1.0f, 0.0f, 0.0f) * camspeed;
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * camspeed;
   }
-  if (MY_KEY_REPEAT(GLFW_KEY_SPACE)) {
-    cameraPos += glm::vec3(0.0f, 1.0f, 0.0f) * camspeed;
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+    cameraPos += cameraUp * camspeed;
   }
-  if (MY_KEY_REPEAT(GLFW_KEY_LEFT_SHIFT)) {
-    cameraPos += glm::vec3(0.0f, -1.0f, 0.0f) * camspeed;
+  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+    cameraPos -= cameraUp * camspeed;
   }
-  if (key == GLFW_KEY_Q and action == GLFW_RELEASE)
-    followMouse = !followMouse;
-  if (followMouse) {
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+    if (!keylock_q) {
+      followMouse = !followMouse;
+      keylock_q = true;
+    }
+    if (followMouse) {
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    } else {
+      glfwSetCursorPos(window, lastX, lastY);
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
   } else {
-    glfwSetCursorPos(window, lastX, lastY);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    keylock_q = false;
   }
-  if (key == GLFW_KEY_K and action == GLFW_RELEASE) {
-    wireframe = !wireframe;  // Toggle wireframe mode
+  if ((glfwGetKey(window, GLFW_KEY_K)) == GLFW_PRESS) {
+    if (!keylock_k) {
+      wireframe = !wireframe;  // Toggle wireframe mode
+      keylock_k = true;
+    }
     if (wireframe) {
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Set wireframe mode
     } else {
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // Set solid mode
     }
+  } else {
+    keylock_k = false;
   }
 }
 
