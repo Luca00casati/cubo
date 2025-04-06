@@ -36,9 +36,12 @@ float lastFrame = 0.0f;
 glm::vec3 bgcolor = mycolor::white;
 
 //locked keys
-bool keylock_q = false;
-bool keylock_k = false;
+struct KeyLock {
+  bool q;
+  bool k;
+};
 
+void input(GLFWwindow* window,KeyLock* keylock);
 
 int main() {
   // glfw: initialize and configure
@@ -79,6 +82,10 @@ int main() {
   // configure global opengl state
   // -----------------------------
   glEnable(GL_DEPTH_TEST);
+
+  //init key lock
+  KeyLock keylock;
+  memset(&keylock, 0, sizeof(keylock));
 
   const char* cubevertexsrc = R"(
 #version 330 core
@@ -181,7 +188,7 @@ void main()
 
     // render
     // ------
-    input(window);
+    input(window, &keylock);
     glClearColor(bgcolor.x, bgcolor.y, bgcolor.z, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -229,8 +236,7 @@ void main()
   return 0;
 }
 
-void input(GLFWwindow* window) {
-  int keystate = 0;
+void input(GLFWwindow* window,KeyLock* keylock) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 
@@ -254,9 +260,9 @@ void input(GLFWwindow* window) {
     cameraPos -= cameraUp * camspeed;
   }
   if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-    if (!keylock_q) {
+    if (!keylock->q) {
       followMouse = !followMouse;
-      keylock_q = true;
+      keylock->q = true;
     }
     if (followMouse) {
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -265,12 +271,12 @@ void input(GLFWwindow* window) {
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
   } else {
-    keylock_q = false;
+    keylock->q = false;
   }
   if ((glfwGetKey(window, GLFW_KEY_K)) == GLFW_PRESS) {
-    if (!keylock_k) {
+    if (!keylock->k) {
       wireframe = !wireframe;  // Toggle wireframe mode
-      keylock_k = true;
+      keylock->k = true;
     }
     if (wireframe) {
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Set wireframe mode
@@ -278,7 +284,7 @@ void input(GLFWwindow* window) {
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // Set solid mode
     }
   } else {
-    keylock_k = false;
+    keylock->k = false;
   }
 }
 

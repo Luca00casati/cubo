@@ -24,15 +24,11 @@ inline glm::vec3 black(0.0f, 0.0f, 0.0f);
 #define OR ||
 #define TRUE 1
 #define FALSE 0
-#define MY_KEY_REPEAT(KEY) \
-  (key == (KEY) || lastframekey == (KEY)) && action != GLFW_RELEASE
-void input(GLFWwindow* window);
 //void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 //                 int mod);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 // void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
-// std::string abspath(const char* path);
 uint createandstuffshaderprogram(const char* vertexShaderCode,
                                  const char* fragmentShaderCode);
 
