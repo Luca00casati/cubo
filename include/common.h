@@ -17,13 +17,14 @@ inline glm::vec3 white(1.0f, 1.0f, 1.0f);
 inline glm::vec3 black(0.0f, 0.0f, 0.0f);
 }  // namespace mycolor
 
-#define SCR_WIDTH 800
-#define SCR_HEIGHT 600
 
 #define AND &&
 #define OR ||
 #define TRUE 1
 #define FALSE 0
+
+typedef unsigned char uchar;
+glm::vec3 reversepixel(float x, float y);
 //void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 //                 int mod);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);

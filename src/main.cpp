@@ -12,6 +12,8 @@
 #include <iostream>
 
 // global
+#define SCR_WIDTH 800
+#define SCR_HEIGHT 600
 // camera
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 10.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -33,6 +35,8 @@ float fov = 45.0f;
 float deltaTime = 0.0f;  // time between current frame and last frame
 float lastFrame = 0.0f;
 
+const float cross_size = 0.02f;
+
 glm::vec3 bgcolor = mycolor::white;
 
 //locked keys
@@ -41,7 +45,7 @@ struct KeyLock {
   bool k;
 };
 
-void input(GLFWwindow* window,KeyLock* keylock);
+void input(GLFWwindow* window, KeyLock* keylock);
 
 int main() {
   // glfw: initialize and configure
@@ -69,6 +73,7 @@ int main() {
   //glfwSetKeyCallback(window, keyCallback);
   //glfwSetInputMode(window, GLFW_STICKY_KEYS, true);
   //glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetCursorPosCallback(window, mouse_callback);
   // glfwSetScrollCallback(window, scroll_callback);
 
@@ -118,18 +123,37 @@ void main()
     FragColor = vec4(ourColor, 1.0f);
 })";
 
+  const char* crosshairVertexSrc = R"(
+#version 330 core
+layout (location = 0) in vec3 aPos;
+void main()
+{
+    gl_Position = vec4(aPos, 1.0f);
+}
+)";
+
+  const char* crosshairFragmentSrc = R"(
+#version 330 core
+out vec4 FragColor;
+uniform vec3 reversecolor;
+void main() {
+        FragColor = vec4(reversecolor, 1.0);
+}
+)";
+
   // build and compile our shader zprogram
   // ------------------------------------
   uint cubeprogramm =
       createandstuffshaderprogram(cubevertexsrc, cubefragmentsrc);
-
+  uint crosshairProgram =
+      createandstuffshaderprogram(crosshairVertexSrc, crosshairFragmentSrc);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
-  float crosshairVertices[] = {// Horizontal line
-                               -0.05f, 0.0f, 0.0f, 0.05f, 0.0f, 0.0f,
-                               // Vertical line
-                               0.0f, 0.05f, 0.0f, 0.0f, -0.05f, 0.0f};
-  float vertices[] = {
+
+  const float crossvertices[] = {-cross_size, 0.0f, 0.0f,       cross_size,
+                                 0.0f,        0.0f, 0.0f,       -cross_size,
+                                 0.0f,        0.0f, cross_size, 0.0f};
+  float cubevertices[] = {
       -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f,
       0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
       -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
@@ -160,14 +184,31 @@ void main()
       glm::vec3(2.4f, -0.4f, 0.0f),  glm::vec3(-1.7f, 3.0f, 0.0f),
       glm::vec3(1.3f, -2.0f, 0.0f),  glm::vec3(1.5f, 2.0f, 0.0f),
       glm::vec3(3.3f, -1.0f, 0.0f),  glm::vec3(3.5f, 1.0f, 0.0f)};
-  uint VBO, VAO;
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
+  //cross
+  uint crossVAO, crossVBO;
+  glGenVertexArrays(1, &crossVAO);
+  glGenBuffers(1, &crossVBO);
 
-  glBindVertexArray(VAO);
+  glBindVertexArray(crossVAO);
+  glBindBuffer(GL_ARRAY_BUFFER, crossVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(crossvertices), crossvertices,
+               GL_STATIC_DRAW);
 
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  // Setup vertex attributes
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  glBindVertexArray(0);
+  //cube
+  uint cubeVBO, cubeVAO;
+  glGenVertexArrays(1, &cubeVAO);
+  glGenBuffers(1, &cubeVBO);
+
+  glBindVertexArray(cubeVAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(cubevertices), cubevertices,
+               GL_STATIC_DRAW);
 
   // position attribute
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
@@ -206,7 +247,7 @@ void main()
     setMat4(cubeprogramm, "view", view);
 
     // render boxes
-    glBindVertexArray(VAO);
+    glBindVertexArray(cubeVAO);
     for (uint i = 0; i < veccubePositions.size(); i++) {
       // calculate the model matrix for each object and pass it to shader
       // before drawing
@@ -217,7 +258,13 @@ void main()
 
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
-
+    glm::vec3 reversepixelvec3 =
+        reversepixel((float)SCR_WIDTH / 2, (float)SCR_HEIGHT / 2);
+    glUseProgram(crosshairProgram);
+    setVec3(crosshairProgram, "reversecolor", reversepixelvec3);
+    glBindVertexArray(crossVAO);
+    glDrawArrays(GL_LINES, 0, 4);  // Draw 4 vertices as a line
+    glBindVertexArray(0);
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse
     // moved etc.)
     // -------------------------------------------------------------------------------
@@ -227,8 +274,10 @@ void main()
 
   // optional: de-allocate all resources once they've outlived their purpose:
   // ------------------------------------------------------------------------
-  glDeleteVertexArrays(1, &VAO);
-  glDeleteBuffers(1, &VBO);
+  glDeleteVertexArrays(1, &crossVAO);
+  glDeleteBuffers(1, &crossVBO);
+  glDeleteVertexArrays(1, &cubeVAO);
+  glDeleteBuffers(1, &cubeVBO);
 
   // glfw: terminate, clearing all previously allocated GLFW resources.
   // ------------------------------------------------------------------
@@ -236,7 +285,7 @@ void main()
   return 0;
 }
 
-void input(GLFWwindow* window,KeyLock* keylock) {
+void input(GLFWwindow* window, KeyLock* keylock) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 
