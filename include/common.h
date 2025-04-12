@@ -24,11 +24,6 @@ inline glm::vec3 black(0.0f, 0.0f, 0.0f);
 #define FALSE 0
 
 typedef unsigned char uchar;
-//void keyCallback(GLFWwindow* window, int key, int scancode, int action,
-//                 int mod);
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-// void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 uint createandstuffshaderprogram(const char* vertexShaderCode,
                                  const char* fragmentShaderCode);
 

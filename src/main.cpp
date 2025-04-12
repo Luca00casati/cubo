@@ -16,7 +16,7 @@ const float myscreenwidth = 800.0f;
 const float myscreenheight = 600.0f;
 // camera
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 10.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraFront = glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - cameraPos);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float cameraSpeed = 4.0f;
 
@@ -24,12 +24,11 @@ bool firstMouse = true;
 float mouseSensitivity = 0.1f;
 bool followMouse = true;
 bool wireframe = false;
-float yaw = -90.0f;  // yaw is initialized to -90.0 degrees since a yaw of 0.0
-    // results in a direction vector pointing to the right so we
-    // initially rotate a bit to the left.
-float pitch = 0.0f;
-float lastX = 800.0f / 2.0;
-float lastY = 600.0 / 2.0;
+float yaw = -50.0f; 
+float pitch = -30.0f;
+double savedX, savedY;
+double lastX = myscreenwidth / 2.0;
+double lastY = myscreenheight / 2.0;
 float fov = 45.0f;
 // timing
 float deltaTime = 0.0f;  // time between current frame and last frame
@@ -70,13 +69,9 @@ int main() {
     return -1;
   }
   glfwMakeContextCurrent(window);
-  //glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-  //glfwSetKeyCallback(window, keyCallback);
   //glfwSetInputMode(window, GLFW_STICKY_KEYS, true);
   //glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-  glfwSetCursorPosCallback(window, mouse_callback);
-  // glfwSetScrollCallback(window, scroll_callback);
 
   // glad: load all OpenGL function pointers
   // ---------------------------------------
@@ -324,9 +319,11 @@ void input(GLFWwindow* window, KeyLock* keylock) {
       keylock->q = true;
     }
     if (followMouse) {
+        glfwGetCursorPos(window, &savedX, &savedY);
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      glfwGetCursorPos(window, &lastX, &lastY);
     } else {
-      glfwSetCursorPos(window, lastX, lastY);
+         glfwSetCursorPos(window, savedX, savedY);
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
   } else {
@@ -345,51 +342,36 @@ void input(GLFWwindow* window, KeyLock* keylock) {
   } else {
     keylock->k = false;
   }
+
+  //mouse 
+  if (followMouse) {
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);  // Get current cursor position
+
+        // Calculate mouse offset (movement)
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos;  // Reverse the y-axis to make it intuitive
+        lastX = xpos;
+        lastY = ypos;
+
+        // Apply mouse sensitivity
+        xoffset *= mouseSensitivity;
+        yoffset *= mouseSensitivity;
+
+        // Update yaw and pitch based on mouse movement
+        yaw += xoffset;
+        pitch += yoffset;
+
+        // Constrain pitch to avoid camera flip
+        if (pitch > 89.0f) pitch = 89.0f;
+        if (pitch < -89.0f) pitch = -89.0f;
+
+        // Update the camera front vector based on yaw and pitch
+        glm::vec3 front;
+        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front.y = sin(glm::radians(pitch));
+        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraFront = glm::normalize(front);
+    }
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-  // make sure the viewport matches the new window dimensions; note that width
-  // and height will be significantly larger than specified on retina displays.
-  glViewport(0, 0, width, height);
-}
-
-// glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
-  if (!followMouse) {
-    return;
-  }
-
-  float xpos = static_cast<float>(xposIn);
-  float ypos = static_cast<float>(yposIn);
-
-  if (firstMouse) {
-    lastX = xpos;
-    lastY = ypos;
-    firstMouse = false;
-  }
-
-  float xoffset = xpos - lastX;
-  float yoffset =
-      lastY - ypos;  // reversed since y-coordinates go from bottom to top
-  lastX = xpos;
-  lastY = ypos;
-
-  xoffset *= mouseSensitivity;
-  yoffset *= mouseSensitivity;
-
-  yaw += xoffset;
-  pitch += yoffset;
-
-  // make sure that when pitch is out of bounds, screen doesn't get flipped
-  if (pitch > 89.0f)
-    pitch = 89.0f;
-  if (pitch < -89.0f)
-    pitch = -89.0f;
-
-  glm::vec3 front;
-  front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-  front.y = sin(glm::radians(pitch));
-  front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-  cameraFront = glm::normalize(front);
-}
