@@ -24,7 +24,6 @@ inline glm::vec3 black(0.0f, 0.0f, 0.0f);
 #define FALSE 0
 
 typedef unsigned char uchar;
-glm::vec3 reversepixel(float x, float y);
 //void keyCallback(GLFWwindow* window, int key, int scancode, int action,
 //                 int mod);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);

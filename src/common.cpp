@@ -9,18 +9,6 @@
 
 #include <iostream>
 
-glm::vec3 reversepixel(float x, float y) {
-  uchar reversecolor[4];
-  glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, reversecolor);
-  float r = reversecolor[0] / 255.0f;
-  float g = reversecolor[1] / 255.0f;
-  float b = reversecolor[2] / 255.0f;
-  float invertedr = 1.0f - r;
-  float invertedg = 1.0f - g;
-  float invertedb = 1.0f - b;
-  return glm::vec3(invertedr, invertedg, invertedb);
-}
-
 uint createandstuffshaderprogram(const char* vertexShaderCode,
                                  const char* fragmentShaderCode) {
   uint vertex, fragment, shaderprogramm;
