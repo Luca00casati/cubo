@@ -1,2 +1,149 @@
+#mine
 build
 unused
+#glfw
+# The canonical out-of-tree build subdirectory
+lib/glfw/build
+lib/glfw/build-*
+# Visual Studio clutter
+lib/glfw/_ReSharper*
+lib/glfw/*.sdf
+lib/glfw/*.suo
+lib/glfw/*.dir
+lib/glfw/*.vcxproj*
+lib/glfw/*.sln
+lib/glfw/.vs
+lib/glfw/CMakeSettings.json
+lib/glfw/Win32
+lib/glfw/x64
+lib/glfw/Debug
+lib/glfw/Release
+lib/glfw/MinSizeRel
+lib/glfw/RelWithDebInfo
+lib/glfw/*.opensdf
+# Xcode clutter
+lib/glfw/GLFW.build
+lib/glfw/GLFW.xcodeproj
+# macOS clutter
+lib/glfw/.DS_Store
+# Makefile generator clutter
+lib/glfw/Makefile
+# Ninja generator clutter
+lib/glfw/build.ninja
+lib/glfw/rules.ninja
+lib/glfw/.ninja_deps
+lib/glfw/.ninja_log
+# CMake clutter
+lib/glfw/CMakeCache.txt
+lib/glfw/CMakeFiles
+lib/glfw/CMakeScripts
+lib/glfw/CMakeDoxyfile.in
+lib/glfw/CMakeDoxygenDefaults.cmake
+lib/glfw/cmake_install.cmake
+lib/glfw/cmake_uninstall.cmake
+# Generated files
+lib/glfw/docs/Doxyfile
+lib/glfw/docs/html
+lib/glfw/docs/warnings.txt
+lib/glfw/docs/doxygen_sqlite3.db
+lib/glfw/src/glfw_config.h
+lib/glfw/src/glfw3.pc
+lib/glfw/src/glfw3Config.cmake
+lib/glfw/src/glfw3ConfigVersion.cmake
+# Compiled binaries
+lib/glfw/src/libglfw.so
+lib/glfw/src/libglfw.so.3
+lib/glfw/src/libglfw.so.3.5
+lib/glfw/src/libglfw.dylib
+lib/glfw/src/libglfw.dylib
+lib/glfw/src/libglfw.3.dylib
+lib/glfw/src/libglfw.3.5.dylib
+lib/glfw/src/libglfw3.a
+lib/glfw/src/glfw3.lib
+lib/glfw/src/glfw3.dll
+lib/glfw/src/glfw3dll.lib
+lib/glfw/src/libglfw3dll.a
+lib/glfw/examples/*.app
+lib/glfw/examples/*.exe
+lib/glfw/examples/boing
+lib/glfw/examples/gears
+lib/glfw/examples/heightmap
+lib/glfw/examples/offscreen
+lib/glfw/examples/particles
+lib/glfw/examples/splitview
+lib/glfw/examples/sharing
+lib/glfw/examples/triangle-opengl
+lib/glfw/examples/wave
+lib/glfw/examples/windows
+lib/glfw/tests/*.app
+lib/glfw/tests/*.exe
+lib/glfw/tests/clipboard
+lib/glfw/tests/cursor
+lib/glfw/tests/empty
+lib/glfw/tests/events
+lib/glfw/tests/gamma
+lib/glfw/tests/glfwinfo
+lib/glfw/tests/icon
+lib/glfw/tests/iconify
+lib/glfw/tests/inputlag
+lib/glfw/tests/joysticks
+lib/glfw/tests/monitors
+lib/glfw/tests/msaa
+lib/glfw/tests/reopen
+lib/glfw/tests/tearing
+lib/glfw/tests/threads
+lib/glfw/tests/timeout
+lib/glfw/tests/title
+lib/glfw/tests/triangle-vulkan
+lib/glfw/tests/window
+lib/glfw/tests/windows
+#glm
+# Compiled Object files
+lib/glm/*.slo
+lib/glm/*.lo
+lib/glm/*.o
+lib/glm/*.obj
+# Precompiled Headers
+lib/glm/*.gch
+lib/glm/*.pch
+# Compiled Dynamic libraries
+lib/glm/*.so
+lib/glm/*.dylib
+lib/glm/*.dll
+# Fortran module files
+lib/glm/*.mod
+# Compiled Static libraries
+lib/glm/*.lai
+lib/glm/*.la
+lib/glm/*.a
+lib/glm/*.lib
+# Executables
+lib/glm/*.exe
+lib/glm/*.out
+lib/glm/*.app
+# CMake
+lib/glm/CMakeCache.txt
+lib/glm/CMakeFiles
+lib/glm/cmake_install.cmake
+lib/glm/install_manifest.txt
+lib/glm/*.cmake
+lib/glm/!glmConfig.cmake
+lib/glm/!glmConfig-version.cmake
+# ^ May need to add future .cmake files as exceptions
+# Test logs
+lib/glm/Testing/*
+# Test input
+lib/glm/test/gtc/*.dds
+# Project Files
+lib/glm/Makefile
+lib/glm/*.cbp
+lib/glm/*.user
+# Misc.
+lib/glm/*.log
+# local build(s)
+lib/glm/build*
+lib/glm/.vs
+lib/glm/.vscode
+lib/glm/CMakeSettings.json
+lib/glm/.DS_Store
+lib/glm/*.swp
