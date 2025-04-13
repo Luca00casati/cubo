@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+#define CUBO_DEBUG
+
 #define AND &&
 #define OR ||
 #define TRUE 1

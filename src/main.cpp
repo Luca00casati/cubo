@@ -12,6 +12,7 @@
 #include <iostream>
 
 // global
+//#define CUBO_DEBUG
 const float myscreenwidth = 800.0f;
 const float myscreenheight = 600.0f;
 // camera
@@ -230,8 +231,10 @@ void main() {
                         myscreenheight);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
                             GL_RENDERBUFFER, rbo);
-  // if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-  //    std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+#ifdef CUBO_DEBUG
+  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n";
+#endif
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   // render loop

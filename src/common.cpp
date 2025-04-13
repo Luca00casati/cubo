@@ -11,17 +11,45 @@
 
 uint createandstuffshaderprogram(const char* vertexShaderCode,
                                  const char* fragmentShaderCode) {
-  uint vertex, fragment, shaderprogramm;
-  vertex = glCreateShader(GL_VERTEX_SHADER);
+#ifdef CUBO_DEBUG
+  int success;
+#define LOG_SIZE 1024
+  char infoLog[LOG_SIZE];
+#endif
+  uint vertex = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex, 1, &vertexShaderCode, NULL);
   glCompileShader(vertex);
-  fragment = glCreateShader(GL_FRAGMENT_SHADER);
+#ifdef CUBO_DEBUG
+  glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
+  if (!success) {
+    glGetShaderInfoLog(vertex, LOG_SIZE, NULL, infoLog);
+    std::cout << "ERROR::VERTEX_SHADER_COMPILATION_ERROR" << infoLog << "\n";
+    exit(18);
+  }
+#endif
+  uint fragment = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragment, 1, &fragmentShaderCode, NULL);
   glCompileShader(fragment);
-  shaderprogramm = glCreateProgram();
+#ifdef CUBO_DEBUG
+  glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
+  if (!success) {
+    glGetShaderInfoLog(fragment, LOG_SIZE, NULL, infoLog);
+    std::cout << "ERROR::FRAGMENT_SHADER_COMPILATION_ERROR" << infoLog << "\n";
+    exit(18);
+  }
+#endif
+  uint shaderprogramm = glCreateProgram();
   glAttachShader(shaderprogramm, vertex);
   glAttachShader(shaderprogramm, fragment);
   glLinkProgram(shaderprogramm);
+#ifdef CUBO_DEBUG
+  glGetProgramiv(shaderprogramm, GL_LINK_STATUS, &success);
+  if (!success) {
+    glGetShaderInfoLog(shaderprogramm, LOG_SIZE, NULL, infoLog);
+    std::cout << "ERROR::PROGRAM_LINKING_ERROR" << infoLog << "\n";
+    exit(18);
+  }
+#endif
   glDeleteShader(vertex);
   glDeleteShader(fragment);
   return shaderprogramm;
