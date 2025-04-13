@@ -17,8 +17,10 @@
 #define FALSE 0
 
 typedef unsigned char uchar;
+typedef unsigned long usize;
 
 namespace mycolor {
+// 17 incredible colors aveiables
 inline const glm::vec3 red(1.0f, 0.0f, 0.0f);
 inline const glm::vec3 maroon(0.5f, 0.0f, 0.0f);
 inline const glm::vec3 baige(0.8f, 0.7f, 0.5f);
@@ -29,7 +31,7 @@ inline const glm::vec3 teal(0.0f, 0.5f, 0.5f);
 inline const glm::vec3 navy(0.0f, 0.0f, 0.5f);
 inline const glm::vec3 yellow(1.0f, 1.0f, 0.0f);
 inline const glm::vec3 orange(1.0f, 0.5f, 0.0f);
-inline const glm::vec3 pink(1.0f, 0.0f, 1.0f);
+inline const glm::vec3 magenta(1.0f, 0.0f, 1.0f);
 inline const glm::vec3 purple(0.5f, 0.0f, 0.5f);
 inline const glm::vec3 cyan(0.0f, 1.0f, 1.0f);
 inline const glm::vec3 grey(0.5f, 0.5f, 0.5f);

@@ -37,7 +37,7 @@ float lastFrame = 0.0f;
 
 const float cross_size = 0.02f;
 
-glm::vec3 cubecolor = mycolor::green;
+//glm::vec3 cubecolor = mycolor::green;
 glm::vec3 bgcolor = mycolor::white;
 
 //locked keys
@@ -172,11 +172,14 @@ void main() {
   // const float cubevertices[]; //define in header
 
   std::vector<glm::vec3> veccubePositions = {
-      glm::vec3(0.0f, 0.0f, 0.0f),   glm::vec3(2.0f, 5.0f, 0.0f),
-      glm::vec3(-1.5f, -4.2f, 0.0f), glm::vec3(-3.8f, -4.0f, 0.0f),
-      glm::vec3(2.4f, -2.4f, 0.0f),  glm::vec3(-1.7f, 3.0f, 0.0f),
-      glm::vec3(1.3f, -5.0f, 0.0f),  glm::vec3(1.5f, 2.0f, 0.0f),
-      glm::vec3(3.3f, -1.0f, 0.0f),  glm::vec3(3.5f, 1.0f, 0.0f)};
+      glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -2.0f, 0.0f),
+      glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f),
+      glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f),
+  };
+  std::vector<glm::vec3> veccubeColors = {
+      mycolor::red,  mycolor::green,  mycolor::blue,
+      mycolor::grey, mycolor::purple, mycolor::magenta,
+  };
   //cross
   uint crossVAO, crossVBO;
   glGenVertexArrays(1, &crossVAO);
@@ -234,6 +237,7 @@ void main() {
 #ifdef CUBO_DEBUG
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n";
+  exit(19);
 #endif
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -257,10 +261,10 @@ void main() {
     glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     setMat4(cubeprogramm, "view", view);
     setVec3(cubeprogramm, "cameraPos", cameraPos);
-    setVec3(cubeprogramm, "baseColor", cubecolor);
     glBindVertexArray(cubeVAO);
-    for (auto& pos : veccubePositions) {
-      glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
+    for (usize i = 0; i < veccubePositions.size(); i++) {
+      glm::mat4 model = glm::translate(glm::mat4(1.0f), veccubePositions[i]);
+      setVec3(cubeprogramm, "baseColor", veccubeColors[i]);
       setMat4(cubeprogramm, "model", model);
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
