@@ -248,7 +248,6 @@ void main() {
     glClearColor(bgcolor.x, bgcolor.y, bgcolor.z, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(cubeprogramm);
-    setVec3(cubeprogramm, "ourColor", cubecolor);
     glm::mat4 projection = glm::perspective(
         glm::radians(fov), myscreenwidth / myscreenheight, 0.1f, 100.0f);
     setMat4(cubeprogramm, "projection", projection);
