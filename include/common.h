@@ -9,20 +9,270 @@
 
 #include <iostream>
 
-namespace mycolor {
-inline glm::vec3 red(1.0f, 0.0f, 0.0f);
-inline glm::vec3 green(0.0f, 1.0f, 0.0f);
-inline glm::vec3 blue(0.0f, 0.0f, 1.0f);
-inline glm::vec3 white(1.0f, 1.0f, 1.0f);
-inline glm::vec3 black(0.0f, 0.0f, 0.0f);
-}  // namespace mycolor
-
 #define AND &&
 #define OR ||
 #define TRUE 1
 #define FALSE 0
 
 typedef unsigned char uchar;
+
+namespace mycolor {
+inline const glm::vec3 red(1.0f, 0.0f, 0.0f);
+inline const glm::vec3 maroon(0.5f, 0.0f, 0.0f);
+inline const glm::vec3 baige(0.8f, 0.7f, 0.5f);
+inline const glm::vec3 lime(0.0f, 1.0f, 0.0f);
+inline const glm::vec3 green(0.0f, 0.5f, 0.0f);
+inline const glm::vec3 blue(0.0f, 0.0f, 1.0f);
+inline const glm::vec3 teal(0.0f, 0.5f, 0.5f);
+inline const glm::vec3 navy(0.0f, 0.0f, 0.5f);
+inline const glm::vec3 yellow(1.0f, 1.0f, 0.0f);
+inline const glm::vec3 orange(1.0f, 0.5f, 0.0f);
+inline const glm::vec3 pink(1.0f, 0.0f, 1.0f);
+inline const glm::vec3 purple(0.5f, 0.0f, 0.5f);
+inline const glm::vec3 cyan(0.0f, 1.0f, 1.0f);
+inline const glm::vec3 grey(0.5f, 0.5f, 0.5f);
+inline const glm::vec3 peach(1.0f, 0.8f, 0.7f);
+inline const glm::vec3 white(1.0f, 1.0f, 1.0f);
+inline const glm::vec3 black(0.0f, 0.0f, 0.0f);
+}  // namespace mycolor
+
+inline const float cubevertices[] = {
+    // world space positions of our cubes
+    // Front face (z = +0.5, normal = (0, 0, 1))
+    -0.5f,
+    -0.5f,
+    0.5f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    0.0f,
+    0.0f,
+    1.0f,
+    0.5f,
+    0.5f,
+    0.5f,
+    0.0f,
+    0.0f,
+    1.0f,
+
+    0.5f,
+    0.5f,
+    0.5f,
+    0.0f,
+    0.0f,
+    1.0f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    0.0f,
+    0.0f,
+    1.0f,
+    -0.5f,
+    -0.5f,
+    0.5f,
+    0.0f,
+    0.0f,
+    1.0f,
+
+    // Back face (z = -0.5, normal = (0, 0, -1))
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    0.0f,
+    0.0f,
+    -1.0f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    0.0f,
+    0.0f,
+    -1.0f,
+    0.5f,
+    -0.5f,
+    -0.5f,
+    0.0f,
+    0.0f,
+    -1.0f,
+
+    0.5f,
+    0.5f,
+    -0.5f,
+    0.0f,
+    0.0f,
+    -1.0f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    0.0f,
+    0.0f,
+    -1.0f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    0.0f,
+    0.0f,
+    -1.0f,
+
+    // Left face (x = -0.5, normal = (-1, 0, 0))
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    -1.0f,
+    0.0f,
+    0.0f,
+    -0.5f,
+    -0.5f,
+    0.5f,
+    -1.0f,
+    0.0f,
+    0.0f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    -1.0f,
+    0.0f,
+    0.0f,
+
+    -0.5f,
+    0.5f,
+    0.5f,
+    -1.0f,
+    0.0f,
+    0.0f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    -1.0f,
+    0.0f,
+    0.0f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    -1.0f,
+    0.0f,
+    0.0f,
+
+    // Right face (x = +0.5, normal = (1, 0, 0))
+    0.5f,
+    -0.5f,
+    -0.5f,
+    1.0f,
+    0.0f,
+    0.0f,
+    0.5f,
+    0.5f,
+    0.5f,
+    1.0f,
+    0.0f,
+    0.0f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    1.0f,
+    0.0f,
+    0.0f,
+
+    0.5f,
+    0.5f,
+    0.5f,
+    1.0f,
+    0.0f,
+    0.0f,
+    0.5f,
+    -0.5f,
+    -0.5f,
+    1.0f,
+    0.0f,
+    0.0f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    1.0f,
+    0.0f,
+    0.0f,
+
+    // Top face (y = +0.5, normal = (0, 1, 0))
+    -0.5f,
+    0.5f,
+    -0.5f,
+    0.0f,
+    1.0f,
+    0.0f,
+    -0.5f,
+    0.5f,
+    0.5f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.5f,
+    0.5f,
+    0.5f,
+    0.0f,
+    1.0f,
+    0.0f,
+
+    0.5f,
+    0.5f,
+    0.5f,
+    0.0f,
+    1.0f,
+    0.0f,
+    0.5f,
+    0.5f,
+    -0.5f,
+    0.0f,
+    1.0f,
+    0.0f,
+    -0.5f,
+    0.5f,
+    -0.5f,
+    0.0f,
+    1.0f,
+    0.0f,
+
+    // Bottom face (y = -0.5, normal = (0, -1, 0))
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    0.0f,
+    -1.0f,
+    0.0f,
+    0.5f,
+    -0.5f,
+    0.5f,
+    0.0f,
+    -1.0f,
+    0.0f,
+    -0.5f,
+    -0.5f,
+    0.5f,
+    0.0f,
+    -1.0f,
+    0.0f,
+
+    0.5f,
+    -0.5f,
+    0.5f,
+    0.0f,
+    -1.0f,
+    0.0f,
+    -0.5f,
+    -0.5f,
+    -0.5f,
+    0.0f,
+    -1.0f,
+    0.0f,
+    0.5f,
+    -0.5f,
+    -0.5f,
+    0.0f,
+    -1.0f,
+    0.0f,
+};
+
 uint createandstuffshaderprogram(const char* vertexShaderCode,
                                  const char* fragmentShaderCode);
 
