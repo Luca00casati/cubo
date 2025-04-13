@@ -24,7 +24,7 @@ bool firstMouse = true;
 float mouseSensitivity = 0.1f;
 bool followMouse = true;
 bool wireframe = false;
-float yaw = -50.0f; 
+float yaw = -50.0f;
 float pitch = -30.0f;
 double savedX, savedY;
 double lastX = myscreenwidth / 2.0;
@@ -90,12 +90,12 @@ int main() {
   memset(&keylock, 0, sizeof(keylock));
 
   const char* cubevertexsrc = R"(
-#version 330 core
-
+  #version 330 core
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec2 aTexCoord;
+layout (location = 1) in vec3 aNormal;
 
-out vec2 TexCoord;
+out vec3 FragPos;
+out vec3 Normal;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -103,22 +103,35 @@ uniform mat4 projection;
 
 void main()
 {
-    TexCoord = aTexCoord;
-    gl_Position = projection * view * model * vec4(aPos, 1.0f);
-})";
+    FragPos = vec3(model * vec4(aPos, 1.0));
+    Normal = mat3(transpose(inverse(model))) * aNormal; // or just aNormal for cubes
+
+    gl_Position = projection * view * vec4(FragPos, 1.0);
+}
+)";
 
   const char* cubefragmentsrc = R"(
-#version 330 core
+  #version 330 core
+in vec3 FragPos;
+in vec3 Normal;
 
 out vec4 FragColor;
-in vec2 TexCoord;
 
-uniform vec3 ourColor;
+uniform vec3 cameraPos;
+uniform vec3 baseColor;
 
 void main()
 {
-    FragColor = vec4(ourColor, 1.0f);
-})";
+    vec3 viewDir = normalize(cameraPos - FragPos);
+    float intensity = max(dot(normalize(Normal), viewDir), 0.0);
+
+    // Optional: Clamp intensity range
+    intensity = clamp(intensity, 0.3, 1.0);
+
+    vec3 color = baseColor * intensity;
+    FragColor = vec4(color, 1.0);
+}
+)";
 
   const char* crosshairVertexSrc = R"(
 #version 330 core
@@ -133,8 +146,9 @@ void main()
 #version 330 core
 out vec4 FragColor;
 uniform sampler2D screenTexture;
+uniform vec2 resolution;
 void main() {
-    vec2 uv = gl_FragCoord.xy / vec2(800.0, 600.0);
+    vec2 uv = gl_FragCoord.xy / resolution;
     vec3 color = texture(screenTexture, uv).rgb;
     FragColor = vec4(vec3(1.0) - color, 1.0);
 }
@@ -152,36 +166,248 @@ void main() {
   const float crossvertices[] = {-cross_size, 0.0f, 0.0f,       cross_size,
                                  0.0f,        0.0f, 0.0f,       -cross_size,
                                  0.0f,        0.0f, cross_size, 0.0f};
-  float cubevertices[] = {
-      -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f,
-      0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
-      -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+  const float cubevertices[] = {
+      // world space positions of our cubes
+      // Front face (z = +0.5, normal = (0, 0, 1))
+      -0.5f,
+      -0.5f,
+      0.5f,
+      0.0f,
+      0.0f,
+      1.0f,
+      0.5f,
+      -0.5f,
+      0.5f,
+      0.0f,
+      0.0f,
+      1.0f,
+      0.5f,
+      0.5f,
+      0.5f,
+      0.0f,
+      0.0f,
+      1.0f,
 
-      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
-      0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-      -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
+      0.5f,
+      0.5f,
+      0.5f,
+      0.0f,
+      0.0f,
+      1.0f,
+      -0.5f,
+      0.5f,
+      0.5f,
+      0.0f,
+      0.0f,
+      1.0f,
+      -0.5f,
+      -0.5f,
+      0.5f,
+      0.0f,
+      0.0f,
+      1.0f,
 
-      -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f,
-      -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
+      // Back face (z = -0.5, normal = (0, 0, -1))
+      -0.5f,
+      -0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      -1.0f,
+      0.5f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      -1.0f,
+      0.5f,
+      -0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      -1.0f,
 
-      0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
-      0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 0.0f, 1.0f,
-      0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+      0.5f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      -1.0f,
+      -0.5f,
+      -0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      -1.0f,
+      -0.5f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      -1.0f,
 
-      -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 1.0f,
-      0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
-      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+      // Left face (x = -0.5, normal = (-1, 0, 0))
+      -0.5f,
+      -0.5f,
+      -0.5f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      -0.5f,
+      -0.5f,
+      0.5f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      -0.5f,
+      0.5f,
+      0.5f,
+      -1.0f,
+      0.0f,
+      0.0f,
 
-      -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
-      0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-      -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
-  // world space positions of our cubes
+      -0.5f,
+      0.5f,
+      0.5f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      -0.5f,
+      0.5f,
+      -0.5f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      -0.5f,
+      -0.5f,
+      -0.5f,
+      -1.0f,
+      0.0f,
+      0.0f,
+
+      // Right face (x = +0.5, normal = (1, 0, 0))
+      0.5f,
+      -0.5f,
+      -0.5f,
+      1.0f,
+      0.0f,
+      0.0f,
+      0.5f,
+      0.5f,
+      0.5f,
+      1.0f,
+      0.0f,
+      0.0f,
+      0.5f,
+      -0.5f,
+      0.5f,
+      1.0f,
+      0.0f,
+      0.0f,
+
+      0.5f,
+      0.5f,
+      0.5f,
+      1.0f,
+      0.0f,
+      0.0f,
+      0.5f,
+      -0.5f,
+      -0.5f,
+      1.0f,
+      0.0f,
+      0.0f,
+      0.5f,
+      0.5f,
+      -0.5f,
+      1.0f,
+      0.0f,
+      0.0f,
+
+      // Top face (y = +0.5, normal = (0, 1, 0))
+      -0.5f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      1.0f,
+      0.0f,
+      -0.5f,
+      0.5f,
+      0.5f,
+      0.0f,
+      1.0f,
+      0.0f,
+      0.5f,
+      0.5f,
+      0.5f,
+      0.0f,
+      1.0f,
+      0.0f,
+
+      0.5f,
+      0.5f,
+      0.5f,
+      0.0f,
+      1.0f,
+      0.0f,
+      0.5f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      1.0f,
+      0.0f,
+      -0.5f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      1.0f,
+      0.0f,
+
+      // Bottom face (y = -0.5, normal = (0, -1, 0))
+      -0.5f,
+      -0.5f,
+      -0.5f,
+      0.0f,
+      -1.0f,
+      0.0f,
+      0.5f,
+      -0.5f,
+      0.5f,
+      0.0f,
+      -1.0f,
+      0.0f,
+      -0.5f,
+      -0.5f,
+      0.5f,
+      0.0f,
+      -1.0f,
+      0.0f,
+
+      0.5f,
+      -0.5f,
+      0.5f,
+      0.0f,
+      -1.0f,
+      0.0f,
+      -0.5f,
+      -0.5f,
+      -0.5f,
+      0.0f,
+      -1.0f,
+      0.0f,
+      0.5f,
+      -0.5f,
+      -0.5f,
+      0.0f,
+      -1.0f,
+      0.0f,
+  };
+
   std::vector<glm::vec3> veccubePositions = {
       glm::vec3(0.0f, 0.0f, 0.0f),   glm::vec3(2.0f, 5.0f, 0.0f),
-      glm::vec3(-1.5f, -2.2f, 0.0f), glm::vec3(-3.8f, -2.0f, 0.0f),
-      glm::vec3(2.4f, -0.4f, 0.0f),  glm::vec3(-1.7f, 3.0f, 0.0f),
-      glm::vec3(1.3f, -2.0f, 0.0f),  glm::vec3(1.5f, 2.0f, 0.0f),
+      glm::vec3(-1.5f, -4.2f, 0.0f), glm::vec3(-3.8f, -4.0f, 0.0f),
+      glm::vec3(2.4f, -2.4f, 0.0f),  glm::vec3(-1.7f, 3.0f, 0.0f),
+      glm::vec3(1.3f, -5.0f, 0.0f),  glm::vec3(1.5f, 2.0f, 0.0f),
       glm::vec3(3.3f, -1.0f, 0.0f),  glm::vec3(3.5f, 1.0f, 0.0f)};
   //cross
   uint crossVAO, crossVBO;
@@ -209,11 +435,12 @@ void main() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(cubevertices), cubevertices,
                GL_STATIC_DRAW);
 
-  // position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+  // Position
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
-  // texture coord attribute
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+
+  // Normal
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
                         (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
@@ -223,22 +450,26 @@ void main() {
   unsigned int texColorBuffer;
   glGenTextures(1, &texColorBuffer);
   glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, myscreenwidth, myscreenheight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, myscreenwidth, myscreenheight, 0,
+               GL_RGB, GL_UNSIGNED_BYTE, NULL);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                         texColorBuffer, 0);
   unsigned int rbo;
   glGenRenderbuffers(1, &rbo);
   glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, myscreenwidth, myscreenheight);
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
- // if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, myscreenwidth,
+                        myscreenheight);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                            GL_RENDERBUFFER, rbo);
+  // if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
   //    std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   // render loop
   // -----------
-while (!glfwWindowShouldClose(window)) {
+  while (!glfwWindowShouldClose(window)) {
     float currentFrame = static_cast<float>(glfwGetTime());
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
@@ -251,10 +482,13 @@ while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(cubeprogramm);
     setVec3(cubeprogramm, "ourColor", mycolor::red);
-    glm::mat4 projection = glm::perspective(glm::radians(fov), myscreenwidth / myscreenheight, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(
+        glm::radians(fov), myscreenwidth / myscreenheight, 0.1f, 100.0f);
     setMat4(cubeprogramm, "projection", projection);
     glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     setMat4(cubeprogramm, "view", view);
+    setVec3(cubeprogramm, "cameraPos", cameraPos);
+    setVec3(cubeprogramm, "baseColor", mycolor::red);
     glBindVertexArray(cubeVAO);
     for (auto& pos : veccubePositions) {
       glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
@@ -268,12 +502,15 @@ while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBlitFramebuffer(0, 0, myscreenwidth, myscreenheight, 0, 0, myscreenwidth, myscreenheight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, myscreenwidth, myscreenheight, 0, 0, myscreenwidth,
+                      myscreenheight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     glUseProgram(crosshairProgram);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texColorBuffer);
     setInt(crosshairProgram, "screenTexture", 0);
+    setVec2(crosshairProgram, "resolution",
+            glm::vec2(myscreenwidth, myscreenheight));
     glBindVertexArray(crossVAO);
     glDrawArrays(GL_LINES, 0, 4);
     glBindVertexArray(0);
@@ -319,11 +556,11 @@ void input(GLFWwindow* window, KeyLock* keylock) {
       keylock->q = true;
     }
     if (followMouse) {
-        glfwGetCursorPos(window, &savedX, &savedY);
+      glfwGetCursorPos(window, &savedX, &savedY);
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
       glfwGetCursorPos(window, &lastX, &lastY);
     } else {
-         glfwSetCursorPos(window, savedX, savedY);
+      glfwSetCursorPos(window, savedX, savedY);
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
   } else {
@@ -343,35 +580,36 @@ void input(GLFWwindow* window, KeyLock* keylock) {
     keylock->k = false;
   }
 
-  //mouse 
+  //mouse
   if (followMouse) {
-        double xpos, ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);  // Get current cursor position
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);  // Get current cursor position
 
-        // Calculate mouse offset (movement)
-        float xoffset = xpos - lastX;
-        float yoffset = lastY - ypos;  // Reverse the y-axis to make it intuitive
-        lastX = xpos;
-        lastY = ypos;
+    // Calculate mouse offset (movement)
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;  // Reverse the y-axis to make it intuitive
+    lastX = xpos;
+    lastY = ypos;
 
-        // Apply mouse sensitivity
-        xoffset *= mouseSensitivity;
-        yoffset *= mouseSensitivity;
+    // Apply mouse sensitivity
+    xoffset *= mouseSensitivity;
+    yoffset *= mouseSensitivity;
 
-        // Update yaw and pitch based on mouse movement
-        yaw += xoffset;
-        pitch += yoffset;
+    // Update yaw and pitch based on mouse movement
+    yaw += xoffset;
+    pitch += yoffset;
 
-        // Constrain pitch to avoid camera flip
-        if (pitch > 89.0f) pitch = 89.0f;
-        if (pitch < -89.0f) pitch = -89.0f;
+    // Constrain pitch to avoid camera flip
+    if (pitch > 89.0f)
+      pitch = 89.0f;
+    if (pitch < -89.0f)
+      pitch = -89.0f;
 
-        // Update the camera front vector based on yaw and pitch
-        glm::vec3 front;
-        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        front.y = sin(glm::radians(pitch));
-        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        cameraFront = glm::normalize(front);
-    }
+    // Update the camera front vector based on yaw and pitch
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
+  }
 }
-

@@ -17,7 +17,6 @@ inline glm::vec3 white(1.0f, 1.0f, 1.0f);
 inline glm::vec3 black(0.0f, 0.0f, 0.0f);
 }  // namespace mycolor
 
-
 #define AND &&
 #define OR ||
 #define TRUE 1
