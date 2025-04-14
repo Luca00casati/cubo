@@ -8,11 +8,11 @@
 #include "../lib/glm/glm/gtc/type_ptr.hpp"
 
 #include "../include/common.h"
+#include "../include/config.h"
 
 #include <iostream>
 
 // global
-//#define CUBO_DEBUG
 const float myscreenwidth = 800.0f;
 const float myscreenheight = 600.0f;
 // camera
@@ -140,7 +140,7 @@ void main()
 layout (location = 0) in vec3 aPos;
 void main()
 {
-    gl_Position = vec4(aPos, 1.0f);
+    gl_Position = vec4(aPos, 1.0);
 }
 )";
 
@@ -234,10 +234,9 @@ void main() {
                         myscreenheight);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
                             GL_RENDERBUFFER, rbo);
-#ifdef CUBO_DEBUG
+#if CUBO_DEBUG == TRUE
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n";
-  exit(19);
 #endif
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
