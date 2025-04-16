@@ -7,6 +7,7 @@
 #include "../lib/glm/glm/gtc/matrix_transform.hpp"
 #include "../lib/glm/glm/gtc/type_ptr.hpp"
 
+#include "../include/vda.hpp"
 #include "../include/common.h"
 #include "../include/config.h"
 
@@ -170,16 +171,17 @@ void main() {
                                  0.0f,        0.0f, cross_size, 0.0f};
 
   // const float cubevertices[]; //define in header
-
-  std::vector<glm::vec3> veccubePositions = {
+  VDA<glm::vec3> VDAcubePositions;
+  vda_append(VDAcubePositions,
       glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -2.0f, 0.0f),
       glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f),
-      glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f),
-  };
-  std::vector<glm::vec3> veccubeColors = {
+      glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f)
+  );
+  VDA<glm::vec3> VDAcubeColors;
+  vda_append(VDAcubeColors,
       mycolor::red,  mycolor::green,  mycolor::blue,
-      mycolor::grey, mycolor::purple, mycolor::magenta,
-  };
+      mycolor::grey, mycolor::purple, mycolor::magenta
+  );
   //cross
   uint crossVAO, crossVBO;
   glGenVertexArrays(1, &crossVAO);
@@ -235,6 +237,7 @@ void main() {
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
                             GL_RENDERBUFFER, rbo);
 #if CUBO_DEBUG == TRUE
+//TODO: better error
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n";
 #endif
@@ -261,11 +264,17 @@ void main() {
     setMat4(cubeprogramm, "view", view);
     setVec3(cubeprogramm, "cameraPos", cameraPos);
     glBindVertexArray(cubeVAO);
-    for (usize i = 0; i < veccubePositions.size(); i++) {
-      glm::mat4 model = glm::translate(glm::mat4(1.0f), veccubePositions[i]);
-      setVec3(cubeprogramm, "baseColor", veccubeColors[i]);
+    if (VDAcubePositions.count == VDAcubeColors.count){
+    for (usize i = 0; i < VDAcubePositions.count; i++) {
+      glm::mat4 model = glm::translate(glm::mat4(1.0f), VDAcubePositions.data[i]);
+      setVec3(cubeprogramm, "baseColor", VDAcubeColors.data[i]);
       setMat4(cubeprogramm, "model", model);
       glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+    }
+    else{
+        std::cout << "cubes positions and colors dont match" << std::endl;
+        exit(4);
     }
 
     // Second pass: draw crosshair to default framebuffer using inverted sampled texture
