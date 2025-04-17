@@ -12,7 +12,7 @@ void vda_grow(VDA<T>& vda) {
     size_t new_capacity = (vda.capacity == 0) ? 256 : vda.capacity * 2;
     T* new_data = static_cast<T*>(std::realloc(vda.data, new_capacity * sizeof(T)));
     if (!new_data) {
-        std::cout << "VDA FAIL!" << std::endl;
+        std::cerr << "VDA FAIL!" << std::endl;
     }
     vda.data = new_data;
     vda.capacity = new_capacity;

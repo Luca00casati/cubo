@@ -24,7 +24,7 @@ uint createandstuffshaderprogram(const char* vertexShaderCode,
   glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(vertex, LOG_SIZE, NULL, infoLog);
-    std::cout << "ERROR::VERTEX_SHADER_COMPILATION_ERROR" << infoLog << "\n";
+    std::cerr << "ERROR::VERTEX_SHADER_COMPILATION_ERROR" << infoLog << "\n";
     exit(18);
   }
 #endif
@@ -35,7 +35,7 @@ uint createandstuffshaderprogram(const char* vertexShaderCode,
   glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(fragment, LOG_SIZE, NULL, infoLog);
-    std::cout << "ERROR::FRAGMENT_SHADER_COMPILATION_ERROR" << infoLog << "\n";
+    std::cerr << "ERROR::FRAGMENT_SHADER_COMPILATION_ERROR" << infoLog << "\n";
     exit(18);
   }
 #endif
@@ -47,7 +47,7 @@ uint createandstuffshaderprogram(const char* vertexShaderCode,
   glGetProgramiv(shaderprogramm, GL_LINK_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(shaderprogramm, LOG_SIZE, NULL, infoLog);
-    std::cout << "ERROR::PROGRAM_LINKING_ERROR" << infoLog << "\n";
+    std::cerr << "ERROR::PROGRAM_LINKING_ERROR" << infoLog << "\n";
     exit(18);
   }
 #endif

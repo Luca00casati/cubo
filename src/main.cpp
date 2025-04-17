@@ -67,7 +67,7 @@ int main() {
   GLFWwindow* window =
       glfwCreateWindow(myscreenwidth, myscreenheight, "CUBO", NULL, NULL);
   if (window == NULL) {
-    std::cout << "Failed to create GLFW window" << std::endl;
+    std::cerr << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
     return -1;
   }
@@ -79,7 +79,7 @@ int main() {
   // glad: load all OpenGL function pointers
   // ---------------------------------------
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    std::cout << "Failed to initialize GLAD" << std::endl;
+    std::cerr << "Failed to initialize GLAD" << std::endl;
     return -1;
   }
 
@@ -237,9 +237,39 @@ void main() {
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
                             GL_RENDERBUFFER, rbo);
 #if CUBO_DEBUG == TRUE
-//TODO: better error
-  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n";
+GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+if (status != GL_FRAMEBUFFER_COMPLETE) {
+    std::cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete! Status: ";
+
+    switch (status) {
+        case GL_FRAMEBUFFER_UNDEFINED:
+            std::cerr << "GL_FRAMEBUFFER_UNDEFINED - Default framebuffer does not exist.\n";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+            std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT - One or more framebuffer attachments are not complete.\n";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+            std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT - No images are attached to the framebuffer.\n";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+            std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER - Draw buffer is incomplete.\n";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+            std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER - Read buffer is incomplete.\n";
+            break;
+        case GL_FRAMEBUFFER_UNSUPPORTED:
+            std::cerr << "GL_FRAMEBUFFER_UNSUPPORTED - Combination of internal formats is not supported.\n";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+            std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE - Multisample settings are inconsistent.\n";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+            std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS - Layered targets are inconsistent.\n";
+            break;
+        default:
+            std::cerr << "Unknown error code: " << status << "\n";
+    }
+}
 #endif
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -273,7 +303,7 @@ void main() {
     }
     }
     else{
-        std::cout << "cubes positions and colors dont match" << std::endl;
+        std::cerr << "cubes positions and colors dont match" << std::endl;
         exit(4);
     }
 
