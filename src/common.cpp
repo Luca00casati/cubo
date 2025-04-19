@@ -5,10 +5,22 @@
 #include "../lib/glm/glm/gtc/matrix_transform.hpp"
 #include "../lib/glm/glm/gtc/type_ptr.hpp"
 
-#include "../include/common.h"
 #include "../include/config.h"
+#include "../include/common.h"
 
 #include <iostream>
+
+glm::vec3 reversepixel(const float x, const float y) {
+  uchar reversecolor[4];
+  glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, reversecolor);
+  const float r = reversecolor[0] / 255.0f;
+  const float g = reversecolor[1] / 255.0f;
+  const float b = reversecolor[2] / 255.0f;
+  const float invertedr = 1.0f - r;
+  const float invertedg = 1.0f - g;
+  const float invertedb = 1.0f - b;
+  return glm::vec3(invertedr, invertedg, invertedb);
+}
 
 uint createandstuffshaderprogram(const char* vertexShaderCode,
                                  const char* fragmentShaderCode) {

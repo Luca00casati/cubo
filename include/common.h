@@ -7,39 +7,37 @@
 #include "../lib/glm/glm/gtc/matrix_transform.hpp"
 #include "../lib/glm/glm/gtc/type_ptr.hpp"
 
-#include <iostream>
+#include <string>
 
 #define AND &&
 #define OR ||
-#define TRUE 1
-#define FALSE 0
 
 typedef unsigned char uchar;
 typedef unsigned long usize;
 
 namespace mycolor {
 // 17 incredible colors aveiables
-inline const glm::vec3 red(1.0f, 0.0f, 0.0f);
-inline const glm::vec3 maroon(0.5f, 0.0f, 0.0f);
-inline const glm::vec3 baige(0.8f, 0.7f, 0.5f);
-inline const glm::vec3 lime(0.0f, 1.0f, 0.0f);
-inline const glm::vec3 green(0.0f, 0.5f, 0.0f);
-inline const glm::vec3 blue(0.0f, 0.0f, 1.0f);
-inline const glm::vec3 teal(0.0f, 0.5f, 0.5f);
-inline const glm::vec3 navy(0.0f, 0.0f, 0.5f);
-inline const glm::vec3 yellow(1.0f, 1.0f, 0.0f);
-inline const glm::vec3 orange(1.0f, 0.5f, 0.0f);
-inline const glm::vec3 magenta(1.0f, 0.0f, 1.0f);
-inline const glm::vec3 purple(0.5f, 0.0f, 0.5f);
-inline const glm::vec3 cyan(0.0f, 1.0f, 1.0f);
-inline const glm::vec3 grey(0.5f, 0.5f, 0.5f);
-inline const glm::vec3 peach(1.0f, 0.8f, 0.7f);
-inline const glm::vec3 white(1.0f, 1.0f, 1.0f);
-inline const glm::vec3 black(0.0f, 0.0f, 0.0f);
+static const glm::vec3 red(1.0f, 0.0f, 0.0f);
+static const glm::vec3 maroon(0.5f, 0.0f, 0.0f);
+static const glm::vec3 baige(0.8f, 0.7f, 0.5f);
+static const glm::vec3 lime(0.0f, 1.0f, 0.0f);
+static const glm::vec3 green(0.0f, 0.5f, 0.0f);
+static const glm::vec3 blue(0.0f, 0.0f, 1.0f);
+static const glm::vec3 teal(0.0f, 0.5f, 0.5f);
+static const glm::vec3 navy(0.0f, 0.0f, 0.5f);
+static const glm::vec3 yellow(1.0f, 1.0f, 0.0f);
+static const glm::vec3 orange(1.0f, 0.5f, 0.0f);
+static const glm::vec3 magenta(1.0f, 0.0f, 1.0f);
+static const glm::vec3 purple(0.5f, 0.0f, 0.5f);
+static const glm::vec3 cyan(0.0f, 1.0f, 1.0f);
+static const glm::vec3 grey(0.5f, 0.5f, 0.5f);
+static const glm::vec3 peach(1.0f, 0.8f, 0.7f);
+static const glm::vec3 white(1.0f, 1.0f, 1.0f);
+static const glm::vec3 black(0.0f, 0.0f, 0.0f);
 }  // namespace mycolor
 
 // world space positions of our cubes
-inline const float cubevertices[] = {
+static const float cubevertices[] = {
     -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  0.0f,
     1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,
     0.0f,  1.0f,  -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,
@@ -61,6 +59,8 @@ inline const float cubevertices[] = {
     0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f,
     0.0f,  0.5f,  -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
 };
+
+glm::vec3 reversepixel(const float x, const float y);
 
 uint createandstuffshaderprogram(const char* vertexShaderCode,
                                  const char* fragmentShaderCode);

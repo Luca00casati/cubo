@@ -1,15 +1,13 @@
 #include "../include/glad/glad.h"
 #include "../lib/glfw/include/GLFW/glfw3.h"
-// #define STB_IMAGE_IMPLEMENTATION
-// #include "../include/stb_image.h"
 
 #include "../lib/glm/glm/glm.hpp"
 #include "../lib/glm/glm/gtc/matrix_transform.hpp"
 #include "../lib/glm/glm/gtc/type_ptr.hpp"
 
+#include "../include/config.h"
 #include "../include/vda.hpp"
 #include "../include/common.h"
-#include "../include/config.h"
 
 #include <iostream>
 
@@ -147,19 +145,16 @@ void main()
 
   const char* crosshairFragmentSrc = R"(
 #version 330 core
-out vec4 FragColor;
-uniform sampler2D screenTexture;
-uniform vec2 resolution;
-void main() {
-    vec2 uv = gl_FragCoord.xy / resolution;
-    vec3 color = texture(screenTexture, uv).rgb;
-    FragColor = vec4(vec3(1.0) - color, 1.0);
-}
+ out vec4 FragColor;
+ uniform vec3 reversecolor;
+ void main() {
+         FragColor = vec4(reversecolor, 1.0);
+ }
 )";
 
   // build and compile our shader zprogram
   // ------------------------------------
-  uint cubeprogramm =
+  uint cubeProgram =
       createandstuffshaderprogram(cubevertexsrc, cubefragmentsrc);
   uint crosshairProgram =
       createandstuffshaderprogram(crosshairVertexSrc, crosshairFragmentSrc);
@@ -182,6 +177,13 @@ void main() {
       mycolor::red,  mycolor::green,  mycolor::blue,
       mycolor::grey, mycolor::purple, mycolor::magenta
   );
+
+//size matching
+if (VDAcubePositions.count != VDAcubeColors.count){
+      std::cerr << "cubes positions and colors dont match" << std::endl;
+        exit(4);
+}
+
   //cross
   uint crossVAO, crossVBO;
   glGenVertexArrays(1, &crossVAO);
@@ -208,7 +210,7 @@ void main() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(cubevertices), cubevertices,
                GL_STATIC_DRAW);
 
-  // Position
+ // Position
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
@@ -216,62 +218,6 @@ void main() {
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
                         (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
-
-  unsigned int framebuffer;
-  glGenFramebuffers(1, &framebuffer);
-  glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-  unsigned int texColorBuffer;
-  glGenTextures(1, &texColorBuffer);
-  glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, myscreenwidth, myscreenheight, 0,
-               GL_RGB, GL_UNSIGNED_BYTE, NULL);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                         texColorBuffer, 0);
-  unsigned int rbo;
-  glGenRenderbuffers(1, &rbo);
-  glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, myscreenwidth,
-                        myscreenheight);
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                            GL_RENDERBUFFER, rbo);
-#if CUBO_DEBUG == TRUE
-GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-if (status != GL_FRAMEBUFFER_COMPLETE) {
-    std::cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete! Status: ";
-
-    switch (status) {
-        case GL_FRAMEBUFFER_UNDEFINED:
-            std::cerr << "GL_FRAMEBUFFER_UNDEFINED - Default framebuffer does not exist.\n";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-            std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT - One or more framebuffer attachments are not complete.\n";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-            std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT - No images are attached to the framebuffer.\n";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-            std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER - Draw buffer is incomplete.\n";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-            std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER - Read buffer is incomplete.\n";
-            break;
-        case GL_FRAMEBUFFER_UNSUPPORTED:
-            std::cerr << "GL_FRAMEBUFFER_UNSUPPORTED - Combination of internal formats is not supported.\n";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-            std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE - Multisample settings are inconsistent.\n";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-            std::cerr << "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS - Layered targets are inconsistent.\n";
-            break;
-        default:
-            std::cerr << "Unknown error code: " << status << "\n";
-    }
-}
-#endif
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   // render loop
   // -----------
@@ -282,48 +228,34 @@ if (status != GL_FRAMEBUFFER_COMPLETE) {
 
     input(window, &keylock);
 
-    // First pass: render to framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    //clear
     glClearColor(bgcolor.x, bgcolor.y, bgcolor.z, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glUseProgram(cubeprogramm);
+ // activate shader
+    glUseProgram(cubeProgram);
     glm::mat4 projection = glm::perspective(
-        glm::radians(fov), myscreenwidth / myscreenheight, 0.1f, 100.0f);
-    setMat4(cubeprogramm, "projection", projection);
+        glm::radians(fov), myscreenwidth/ myscreenheight, 0.1f, 100.0f);
+    setMat4(cubeProgram, "projection", projection);
+
     glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-    setMat4(cubeprogramm, "view", view);
-    setVec3(cubeprogramm, "cameraPos", cameraPos);
+    setMat4(cubeProgram, "view", view);
+        setVec3(cubeProgram, "cameraPos", cameraPos);
+
+    // render boxes
     glBindVertexArray(cubeVAO);
-    if (VDAcubePositions.count == VDAcubeColors.count){
-    for (usize i = 0; i < VDAcubePositions.count; i++) {
-      glm::mat4 model = glm::translate(glm::mat4(1.0f), VDAcubePositions.data[i]);
-      setVec3(cubeprogramm, "baseColor", VDAcubeColors.data[i]);
-      setMat4(cubeprogramm, "model", model);
+    for (uint i = 0; i < VDAcubePositions.count; i++) {
+         glm::mat4 model = glm::translate(glm::mat4(1.0f), VDAcubePositions.data[i]);
+      setVec3(cubeProgram, "baseColor", VDAcubeColors.data[i]);
+      setMat4(cubeProgram, "model", model);
+
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
-    }
-    else{
-        std::cerr << "cubes positions and colors dont match" << std::endl;
-        exit(4);
-    }
-
-    // Second pass: draw crosshair to default framebuffer using inverted sampled texture
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClearColor(bgcolor.x, bgcolor.y, bgcolor.z, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBlitFramebuffer(0, 0, myscreenwidth, myscreenheight, 0, 0, myscreenwidth,
-                      myscreenheight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
+    glm::vec3 reversepixelvec3 =
+        reversepixel(myscreenwidth/ 2, myscreenheight  / 2);
     glUseProgram(crosshairProgram);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-    setInt(crosshairProgram, "screenTexture", 0);
-    setVec2(crosshairProgram, "resolution",
-            glm::vec2(myscreenwidth, myscreenheight));
+    setVec3(crosshairProgram, "reversecolor", reversepixelvec3);
     glBindVertexArray(crossVAO);
-    glDrawArrays(GL_LINES, 0, 4);
+    glDrawArrays(GL_LINES, 0, 4);  // Draw 4 vertices as a line
     glBindVertexArray(0);
 
     glfwSwapBuffers(window);
