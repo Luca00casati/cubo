@@ -24,7 +24,7 @@ glm::vec3 reversepixel(const float x, const float y) {
 
 uint createandstuffshaderprogram(const char* vertexShaderCode,
                                  const char* fragmentShaderCode) {
-#if CUBO_DEBUG == TRUE
+#if CUBO_DEBUG
   int success;
 #define LOG_SIZE 1024
   char infoLog[LOG_SIZE];
@@ -32,7 +32,7 @@ uint createandstuffshaderprogram(const char* vertexShaderCode,
   uint vertex = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex, 1, &vertexShaderCode, NULL);
   glCompileShader(vertex);
-#if CUBO_DEBUG == TRUE
+#if CUBO_DEBUG
   glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(vertex, LOG_SIZE, NULL, infoLog);
@@ -43,7 +43,7 @@ uint createandstuffshaderprogram(const char* vertexShaderCode,
   uint fragment = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragment, 1, &fragmentShaderCode, NULL);
   glCompileShader(fragment);
-#if CUBO_DEBUG == TRUE
+#if CUBO_DEBUG
   glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(fragment, LOG_SIZE, NULL, infoLog);
@@ -55,7 +55,7 @@ uint createandstuffshaderprogram(const char* vertexShaderCode,
   glAttachShader(shaderprogramm, vertex);
   glAttachShader(shaderprogramm, fragment);
   glLinkProgram(shaderprogramm);
-#if CUBO_DEBUG == TRUE
+#if CUBO_DEBUG
   glGetProgramiv(shaderprogramm, GL_LINK_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(shaderprogramm, LOG_SIZE, NULL, infoLog);
